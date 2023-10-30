@@ -15,9 +15,7 @@
     limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.setupcompat" >
+<manifest package="com.google.android.setupcompat">
   <!-- Set in the BUILD or gradle file -->
-  <uses-sdk
-      android:minSdkVersion="19" />
+  <uses-sdk />
 </manifest>
