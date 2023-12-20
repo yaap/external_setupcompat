@@ -210,6 +210,10 @@ public enum PartnerConfig {
   CONFIG_ILLUSTRATION_MAX_WIDTH(
       PartnerConfigKey.KEY_ILLUSTRATION_MAX_WIDTH, ResourceType.DIMENSION),
 
+  // The max height of the illustration
+  CONFIG_ILLUSTRATION_MAX_HEIGHT(
+      PartnerConfigKey.KEY_ILLUSTRATION_MAX_HEIGHT, ResourceType.DIMENSION),
+
   // Background color of the header area
   CONFIG_HEADER_AREA_BACKGROUND_COLOR(
       PartnerConfigKey.KEY_HEADER_AREA_BACKGROUND_COLOR, ResourceType.COLOR),
