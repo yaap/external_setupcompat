@@ -103,7 +103,10 @@ android_library {
     sdk_version: "current",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
-    }
+    },
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 android_library {
@@ -128,5 +131,8 @@ android_library {
     sdk_version: "current",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
-    }
+    },
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
