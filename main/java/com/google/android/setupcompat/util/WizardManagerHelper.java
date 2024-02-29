@@ -35,12 +35,18 @@ public final class WizardManagerHelper {
 
   /** Enum for notifying an Activity that what SetupWizard flow is */
   public enum SuwLifeCycleEnum {
-    UNKNOWN,
-    INITIALIZATION,
-    PREDEFERRED,
-    DEFERRED,
-    PORTAL,
-    RESTORE_ANYTIME;
+    UNKNOWN(0),
+    INITIALIZATION(1),
+    PREDEFERRED(2),
+    DEFERRED(3),
+    PORTAL(4),
+    RESTORE_ANYTIME(5);
+
+    public final int value;
+
+    SuwLifeCycleEnum(int value) {
+      this.value = value;
+    }
   }
 
   /** Extra for notifying an Activity that what SetupWizard flow is. */
@@ -140,7 +146,7 @@ public final class WizardManagerHelper {
     // The TikTok code in Restore doesn't let us put serializable extras into intents.
     dstIntent.putExtra(
         EXTRA_SUW_LIFECYCLE,
-        srcIntent.getIntExtra(EXTRA_SUW_LIFECYCLE, SuwLifeCycleEnum.UNKNOWN.ordinal()));
+        srcIntent.getIntExtra(EXTRA_SUW_LIFECYCLE, SuwLifeCycleEnum.UNKNOWN.value));
     dstIntent.putExtra(EXTRA_THEME, srcIntent.getStringExtra(EXTRA_THEME));
   }
 

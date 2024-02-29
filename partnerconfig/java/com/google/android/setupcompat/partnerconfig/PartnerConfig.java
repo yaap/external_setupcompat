@@ -275,7 +275,8 @@ public enum PartnerConfig {
       PartnerConfigKey.KEY_ACCOUNT_NAME_TEXT_SIZE, ResourceType.DIMENSION),
 
   // Font family of the account name
-  CONFIG_ACCOUNT_NAME_FONT_FAMILY(PartnerConfigKey.KEY_ACCOUNT_NAME_FONT_FAMILY, ResourceType.STRING),
+  CONFIG_ACCOUNT_NAME_FONT_FAMILY(
+      PartnerConfigKey.KEY_ACCOUNT_NAME_FONT_FAMILY, ResourceType.STRING),
 
   // Margin end of the account avatar
   CONFIG_ACCOUNT_AVATAR_MARGIN_END(
@@ -499,7 +500,11 @@ public enum PartnerConfig {
 
   // The margin bottom of progress bar.
   CONFIG_PROGRESS_BAR_MARGIN_BOTTOM(
-      PartnerConfigKey.KEY_PROGRESS_BAR_MARGIN_BOTTOM, ResourceType.DIMENSION);
+      PartnerConfigKey.KEY_PROGRESS_BAR_MARGIN_BOTTOM, ResourceType.DIMENSION),
+
+  // The adapt window width to be part of determining two pane style condition
+  CONFIG_TWO_PANE_ADAPT_WINDOW_WIDTH(
+      PartnerConfigKey.KEY_TWO_PANE_ADAPT_WINDOW_WIDTH, ResourceType.INTEGER);
 
   /** Resource type of the partner resources type. */
   public enum ResourceType {

@@ -150,6 +150,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_LOADING_LAYOUT_WAIT_FOR_ANIMATION_FINISHED,
   PartnerConfigKey.KEY_PROGRESS_BAR_MARGIN_TOP,
   PartnerConfigKey.KEY_PROGRESS_BAR_MARGIN_BOTTOM,
+  PartnerConfigKey.KEY_TWO_PANE_ADAPT_WINDOW_WIDTH,
 })
 // TODO: can be removed and always reference PartnerConfig.getResourceName()?
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
@@ -566,4 +567,7 @@ public @interface PartnerConfigKey {
 
   // A margin bottom of the content frame of progress bar.
   String KEY_PROGRESS_BAR_MARGIN_BOTTOM = "setup_design_progress_bar_margin_bottom";
+
+  // A adapt window width to determine how large to show two panel.
+  String KEY_TWO_PANE_ADAPT_WINDOW_WIDTH = "setup_compat_two_pane_adapt_window_width";
 }
