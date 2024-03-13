@@ -975,9 +975,9 @@ public class PartnerConfigHelper {
                     /* arg= */ null,
                     /* extras= */ null);
       } catch (IllegalArgumentException | SecurityException exception) {
-        Log.w(TAG, "SetupWizard full dynamic color supporting status unknown; return as false.");
+        Log.w(TAG, "SetupWizard full dynamic color supporting status unknown; return as true.");
         applyFullDynamicColorBundle = null;
-        return false;
+        return true;
       }
     }
 
