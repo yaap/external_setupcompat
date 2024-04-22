@@ -34,10 +34,12 @@ import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
  */
 public final class ForceTwoPaneHelper {
 
-  // Refer Support different screen sizes as guideline that any device that the width >= 600 will
-  // consider as large screen
+  // Refer Support different screen sizes as guideline that any device that the width >= 840 will
+  // consider as large screen, b/322117552#comment15 mentioned that the apply 2 pane layouts based
+  // on width >= 840dp as screen breakpoints.
+  //
   // https://developer.android.com/guide/topics/large-screens/support-different-screen-sizes
-  private static final int DEFAULT_ADAPT_WINDOW_WIDTH = 600;
+  private static final int DEFAULT_ADAPT_WINDOW_WIDTH = 840;
 
   private static final Logger LOG = new Logger("ForceTwoPaneHelper");
 
