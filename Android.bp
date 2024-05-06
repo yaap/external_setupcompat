@@ -49,6 +49,7 @@ filegroup {
         "main/java/com/google/android/setupcompat/*.java",
         "main/java/com/google/android/setupcompat/internal/*.java",
         "main/java/com/google/android/setupcompat/logging/*.java",
+        "main/java/com/google/android/setupcompat/logging/*.kt",
         "main/java/com/google/android/setupcompat/logging/internal/*.java",
         "main/java/com/google/android/setupcompat/template/*.java",
         "main/java/com/google/android/setupcompat/util/*.java",
