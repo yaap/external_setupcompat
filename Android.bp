@@ -98,6 +98,7 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.window_window",
+        "com.google.android.material_material",
         "error_prone_annotations",
     ],
     min_sdk_version: "21",
@@ -126,6 +127,7 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.window_window",
+        "com.google.android.material_material",
         "error_prone_annotations",
     ],
     min_sdk_version: "21",
