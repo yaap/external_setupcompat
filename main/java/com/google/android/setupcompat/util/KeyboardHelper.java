@@ -16,6 +16,7 @@
 package com.google.android.setupcompat.util;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import androidx.annotation.NonNull;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 
@@ -25,6 +26,13 @@ public final class KeyboardHelper {
   /** Returns whether the keyboard focus changed is enabled. */
   public static boolean isKeyboardFocusEnhancementEnabled(@NonNull Context context) {
     return PartnerConfigHelper.isKeyboardFocusEnhancementEnabled(context);
+  }
+
+  /** Returns whether a physical keyboard is available. */
+  public static boolean hasHardwareKeyboard(Context context) {
+    Configuration configuration = context.getResources().getConfiguration();
+    return configuration.keyboard != Configuration.KEYBOARD_NOKEYS
+        && configuration.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES;
   }
 
   private KeyboardHelper() {}

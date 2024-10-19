@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
@@ -61,7 +62,9 @@ import com.google.android.setupcompat.logging.internal.FooterBarMixinMetrics;
 import com.google.android.setupcompat.partnerconfig.PartnerConfig;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 import com.google.android.setupcompat.template.FooterButton.ButtonType;
+import com.google.android.setupcompat.util.KeyboardHelper;
 import com.google.android.setupcompat.util.Logger;
+import com.google.android.setupcompat.view.ButtonBarLayout;
 import java.util.Locale;
 
 /**
@@ -533,6 +536,15 @@ public class FooterBarMixin implements Mixin {
     // Make sure the position of buttons are correctly and prevent primary button create twice or
     // more.
     repopulateButtons();
+
+    // The requestFocus() is only working after activity onResume.
+    button.post(
+        () -> {
+          if (KeyboardHelper.isKeyboardFocusEnhancementEnabled(context)
+              && KeyboardHelper.hasHardwareKeyboard(context)) {
+            button.requestFocus();
+          }
+        });
   }
 
   /** Returns the {@link FooterButton} of primary button. */
@@ -549,6 +561,18 @@ public class FooterBarMixin implements Mixin {
    */
   public Button getPrimaryButtonView() {
     return buttonContainer == null ? null : buttonContainer.findViewById(primaryButtonId);
+  }
+
+  /** Returns the height of footer bar. */
+  public int getFooterBarHeight() {
+    if (buttonContainer != null) {
+      LinearLayout.LayoutParams footerBarLayoutParams =
+          (LinearLayout.LayoutParams) buttonContainer.getLayoutParams();
+      if (footerBarLayoutParams != null) {
+        return footerBarLayoutParams.height;
+      }
+    }
+    return 0;
   }
 
   @VisibleForTesting
@@ -651,6 +675,18 @@ public class FooterBarMixin implements Mixin {
     // Make sure the position of buttons are correctly and prevent secondary button create twice or
     // more.
     repopulateButtons();
+
+    // The requestFocus() is only working after activity onResume.
+    button.post(
+        () -> {
+          if (KeyboardHelper.isKeyboardFocusEnhancementEnabled(context)
+              && KeyboardHelper.hasHardwareKeyboard(context)
+              && (primaryButtonId == 0
+                  // primary button may not be visible but it has been created
+                  || getPrimaryButtonView().getVisibility() != View.VISIBLE)) {
+            button.requestFocus();
+          }
+        });
   }
 
   /**
@@ -762,37 +798,50 @@ public class FooterBarMixin implements Mixin {
               }
 
               // TODO: b/364981820 - Use partner config to allow user to customize button width.
-              footerBarWidth =
+              int availableFooterBarWidth =
                   footerBarWidth
                       - footerBarPaddingStart
                       - footerBarPaddingEnd
                       - footerBarButtonMiddleSpacing;
-
+              int maxButtonWidth = availableFooterBarWidth / 2;
               if (isBothButtons(primaryButton, secondaryButton)) {
                 LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
                 LayoutParams secondaryLayoutParams =
                     (LayoutParams) secondaryButton.getLayoutParams();
-                if (primaryLayoutParams != null) {
-                  primaryLayoutParams.width = footerBarWidth / 2;
-                  primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
+
+                boolean isPrimaryTextTooLong = isTextTooLong(primaryButton, maxButtonWidth);
+                boolean isSecondaryTextTooLong = isTextTooLong(secondaryButton, maxButtonWidth);
+                if (isPrimaryTextTooLong || isSecondaryTextTooLong) {
+                  if (buttonContainer instanceof ButtonBarLayout) {
+                    ((ButtonBarLayout) buttonContainer).setStackedButtonForExpressiveStyle(true);
+                  }
+                  primaryLayoutParams.width = availableFooterBarWidth;
                   primaryButton.setLayoutParams(primaryLayoutParams);
-                }
-                if (secondaryLayoutParams != null) {
-                  secondaryLayoutParams.width = footerBarWidth / 2;
-                  secondaryLayoutParams.setMarginEnd(footerBarButtonMiddleSpacing / 2);
+                  secondaryLayoutParams.width = availableFooterBarWidth;
                   secondaryButton.setLayoutParams(secondaryLayoutParams);
+                } else {
+                  if (primaryLayoutParams != null) {
+                    primaryLayoutParams.width = maxButtonWidth;
+                    primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
+                    primaryButton.setLayoutParams(primaryLayoutParams);
+                  }
+                  if (secondaryLayoutParams != null) {
+                    secondaryLayoutParams.width = maxButtonWidth;
+                    secondaryLayoutParams.setMarginEnd(footerBarButtonMiddleSpacing / 2);
+                    secondaryButton.setLayoutParams(secondaryLayoutParams);
+                  }
                 }
               } else if (isPrimaryButtonOnly(primaryButton, secondaryButton)) {
                 LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
                 if (primaryLayoutParams != null) {
-                  primaryLayoutParams.width = footerBarWidth;
+                  primaryLayoutParams.width = availableFooterBarWidth;
                   primaryButton.setLayoutParams(primaryLayoutParams);
                 }
               } else if (isSecondaryOnly(primaryButton, secondaryButton)) {
                 LayoutParams secondaryLayoutParams =
                     (LayoutParams) secondaryButton.getLayoutParams();
                 if (secondaryLayoutParams != null) {
-                  secondaryLayoutParams.width = footerBarWidth;
+                  secondaryLayoutParams.width = availableFooterBarWidth;
                   secondaryButton.setLayoutParams(secondaryLayoutParams);
                 }
               } else {
@@ -838,6 +887,16 @@ public class FooterBarMixin implements Mixin {
         };
 
     buttonContainer.getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
+  }
+
+  @VisibleForTesting
+  boolean isTextTooLong(Button button, float maxButtonWidth) {
+    String text = button.getText().toString();
+    Paint paint = new Paint();
+    paint.setTextSize(button.getTextSize());
+    paint.setTypeface(button.getTypeface());
+    float textWidth = paint.measureText(text);
+    return maxButtonWidth < textWidth;
   }
 
   private boolean isTwoPaneLayout() {

@@ -144,7 +144,7 @@ public class PartnerConfigHelper {
   @VisibleForTesting
   public static Bundle applyForceTwoPaneBundle = null;
 
-  @VisibleForTesting static Bundle applyGlifExpressiveBundle = null;
+  @VisibleForTesting public static Bundle applyGlifExpressiveBundle = null;
 
   @VisibleForTesting public static int savedOrientation = Configuration.ORIENTATION_PORTRAIT;
 
@@ -1164,8 +1164,7 @@ public class PartnerConfigHelper {
   }
 
   /**
-   * Returns true if the SetupWizard supports Glif Expressive (BC25) style inside or outside setup
-   * flow.
+   * Returns true if the SetupWizard supports Glif Expressive style inside or outside setup flow.
    */
   public static boolean isGlifExpressiveEnabled(@NonNull Context context) {
 

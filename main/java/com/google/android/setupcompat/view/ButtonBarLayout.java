@@ -42,6 +42,8 @@ public class ButtonBarLayout extends LinearLayout {
   private int originalPaddingLeft;
   private int originalPaddingRight;
 
+  private boolean stackedButtonForExpressiveStyle;
+
   public ButtonBarLayout(Context context) {
     super(context);
   }
@@ -70,7 +72,8 @@ public class ButtonBarLayout extends LinearLayout {
 
     super.onMeasure(initialWidthMeasureSpec, heightMeasureSpec);
 
-    final boolean childrenLargerThanContainer = (widthSize > 0) && (getMeasuredWidth() > widthSize);
+    final boolean childrenLargerThanContainer =
+        ((widthSize > 0) && (getMeasuredWidth() > widthSize)) || stackedButtonForExpressiveStyle;
     if (!isFooterButtonsEvenlyWeighted(getContext()) && childrenLargerThanContainer) {
       setStacked(true);
 
@@ -215,6 +218,14 @@ public class ButtonBarLayout extends LinearLayout {
       return true;
     } else {
       return false;
+    }
+  }
+
+  public void setStackedButtonForExpressiveStyle(boolean isStacked) {
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(getContext())) {
+      stackedButtonForExpressiveStyle = isStacked;
+    } else {
+      stackedButtonForExpressiveStyle = false;
     }
   }
 }
