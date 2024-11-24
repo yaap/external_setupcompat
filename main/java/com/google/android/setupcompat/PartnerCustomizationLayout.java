@@ -309,17 +309,20 @@ public class PartnerCustomizationLayout extends TemplateLayout {
    * {@code false}.
    */
   public boolean shouldApplyDynamicColor() {
-    if (!PartnerConfigHelper.isSetupWizardDynamicColorEnabled(getContext())) {
-      return false;
-    }
-
-    if (!useDynamicColor) {
-      return false;
-    }
     if (!BuildCompatUtils.isAtLeastS()) {
       return false;
     }
+
     if (!PartnerConfigHelper.get(getContext()).isAvailable()) {
+      return false;
+    }
+
+    // If the dynamic theme is applied, useDynamicColor would be true and shouldApplyDynamicColor
+    // would return true.
+    if (useDynamicColor) {
+      return true;
+    }
+    if (!PartnerConfigHelper.isSetupWizardDynamicColorEnabled(getContext())) {
       return false;
     }
     return true;

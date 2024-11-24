@@ -25,11 +25,14 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
+import android.text.Layout.Alignment;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -563,18 +566,6 @@ public class FooterBarMixin implements Mixin {
     return buttonContainer == null ? null : buttonContainer.findViewById(primaryButtonId);
   }
 
-  /** Returns the height of footer bar. */
-  public int getFooterBarHeight() {
-    if (buttonContainer != null) {
-      LinearLayout.LayoutParams footerBarLayoutParams =
-          (LinearLayout.LayoutParams) buttonContainer.getLayoutParams();
-      if (footerBarLayoutParams != null) {
-        return footerBarLayoutParams.height;
-      }
-    }
-    return 0;
-  }
-
   @VisibleForTesting
   boolean isPrimaryButtonVisible() {
     return getPrimaryButtonView() != null && getPrimaryButtonView().getVisibility() == View.VISIBLE;
@@ -782,9 +773,10 @@ public class FooterBarMixin implements Mixin {
             if (!isDownButton) {
               Button primaryButton = getPrimaryButtonView();
               Button secondaryButton = getSecondaryButtonView();
-              int footerBarWidth = buttonContainer.getWidth();
+              DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+              int screenWidth = displayMetrics.widthPixels;
               if (isTwoPaneLayout()) {
-                footerBarWidth = footerBarWidth / 2;
+                screenWidth = screenWidth / 2;
                 if (primaryButton != null) {
                   // Set back the margin once down button scrolling to the bottom.
                   LinearLayout.LayoutParams primaryLayoutParams =
@@ -799,7 +791,7 @@ public class FooterBarMixin implements Mixin {
 
               // TODO: b/364981820 - Use partner config to allow user to customize button width.
               int availableFooterBarWidth =
-                  footerBarWidth
+                  screenWidth
                       - footerBarPaddingStart
                       - footerBarPaddingEnd
                       - footerBarButtonMiddleSpacing;
@@ -811,13 +803,18 @@ public class FooterBarMixin implements Mixin {
 
                 boolean isPrimaryTextTooLong = isTextTooLong(primaryButton, maxButtonWidth);
                 boolean isSecondaryTextTooLong = isTextTooLong(secondaryButton, maxButtonWidth);
+
                 if (isPrimaryTextTooLong || isSecondaryTextTooLong) {
                   if (buttonContainer instanceof ButtonBarLayout) {
                     ((ButtonBarLayout) buttonContainer).setStackedButtonForExpressiveStyle(true);
                   }
+                  int stackButtonMiddleSpacing = footerBarButtonMiddleSpacing / 2;
                   primaryLayoutParams.width = availableFooterBarWidth;
+                  primaryLayoutParams.bottomMargin = stackButtonMiddleSpacing;
                   primaryButton.setLayoutParams(primaryLayoutParams);
+
                   secondaryLayoutParams.width = availableFooterBarWidth;
+                  secondaryLayoutParams.topMargin = stackButtonMiddleSpacing;
                   secondaryButton.setLayoutParams(secondaryLayoutParams);
                 } else {
                   if (primaryLayoutParams != null) {
@@ -848,38 +845,24 @@ public class FooterBarMixin implements Mixin {
                 LOG.atInfo("There are no button visible in the footer bar.");
               }
             } else {
-              // TODO: b/364121308 - Extract values as attributes.
-              // Set up down button styles.
-              int width =
-                  context
-                      .getResources()
-                      .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
-              int height =
-                  context
-                      .getResources()
-                      .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_height);
-              float radius =
-                  context
-                      .getResources()
-                      .getDimension(R.dimen.suc_glif_expressive_down_button_radius);
-              setSizeForButton(getPrimaryButtonView(), width, height);
-              setRadiusForButton(getPrimaryButtonView(), radius);
-
-              if (getPrimaryButton() != null && getSecondaryButton() == null) {
-                if (!isTwoPaneLayout()) {
-                  buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-                } else {
-                  buttonContainer.setGravity(Gravity.NO_GRAVITY);
-                  int containerWidth = buttonContainer.getWidth();
-                  Button downButtonView = getPrimaryButtonView();
-                  LayoutParams primaryLayoutParams = (LayoutParams) downButtonView.getLayoutParams();
-                  int buttonWidth = primaryLayoutParams.width;
-                  int halfContainerWidth = containerWidth / 2;
-                  initialLeftMargin = primaryLayoutParams.leftMargin;
-                  primaryLayoutParams.leftMargin =
-                      (halfContainerWidth + (containerWidth / 2 - buttonWidth) / 2);
-                  downButtonView.setLayoutParams(primaryLayoutParams);
-                }
+              // Only allow primary button been shown on the screen if in the down button style.
+              if (getSecondaryButtonView() != null) {
+                getSecondaryButtonView().setVisibility(View.GONE);
+              }
+              setDownButtonStyle(getPrimaryButtonView());
+              if (!isTwoPaneLayout()) {
+                buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+              } else {
+                buttonContainer.setGravity(Gravity.CENTER_VERTICAL);
+                int containerWidth = buttonContainer.getWidth();
+                Button downButtonView = getPrimaryButtonView();
+                LayoutParams primaryLayoutParams = (LayoutParams) downButtonView.getLayoutParams();
+                int halfContainerWidth = containerWidth / 2;
+                // Put down button to the center of the one side in two pane mode.
+                primaryLayoutParams.setMarginStart(
+                    (halfContainerWidth
+                        + (halfContainerWidth / 2 - downButtonView.getWidth() / 2)));
+                downButtonView.setLayoutParams(primaryLayoutParams);
               }
             }
             buttonContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -889,14 +872,24 @@ public class FooterBarMixin implements Mixin {
     buttonContainer.getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
   }
 
-  @VisibleForTesting
-  boolean isTextTooLong(Button button, float maxButtonWidth) {
+  // TODO: b/376153500 - Add a test case for button stack mechanism.
+  private boolean isTextTooLong(Button button, float maxButtonWidth) {
     String text = button.getText().toString();
-    Paint paint = new Paint();
-    paint.setTextSize(button.getTextSize());
-    paint.setTypeface(button.getTypeface());
-    float textWidth = paint.measureText(text);
-    return maxButtonWidth < textWidth;
+    TextPaint textPaint = button.getPaint();
+
+    int buttonWidth = (int) maxButtonWidth - button.getPaddingLeft() - button.getPaddingRight();
+
+    // Generate a static layout to see if text requires switching lines.
+    StaticLayout staticLayout =
+        new StaticLayout(
+            text,
+            textPaint,
+            buttonWidth,
+            Alignment.ALIGN_CENTER,
+            /* spacingMult= */ 1.0f,
+            /* spacingAdd= */ 0.0f,
+            /* includePad= */ false);
+    return staticLayout.getLineCount() > 1;
   }
 
   private boolean isTwoPaneLayout() {
@@ -939,16 +932,27 @@ public class FooterBarMixin implements Mixin {
     return isSecondaryOnly || isSecondaryOnlyButPrimaryInvisible;
   }
 
-  private void setSizeForButton(Button button, int width, int height) {
+  private void setDownButtonStyle(Button button) {
+    // TODO: b/364121308 - Extract values as attributes.
+    int width =
+        context.getResources().getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
+    int height =
+        context
+            .getResources()
+            .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_height);
+
     if (button != null) {
       LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) button.getLayoutParams();
       layoutParams.width = width;
       layoutParams.height = height;
       button.setLayoutParams(layoutParams);
     }
+    setDownButtonRadius(button);
   }
 
-  private void setRadiusForButton(Button button, float radius) {
+  private void setDownButtonRadius(Button button) {
+    float radius =
+        context.getResources().getDimension(R.dimen.suc_glif_expressive_down_button_radius);
     if (button != null) {
       if (button instanceof MaterialButton) {
         ((MaterialButton) button).setCornerRadius((int) radius);

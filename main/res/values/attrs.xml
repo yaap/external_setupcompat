@@ -105,6 +105,8 @@
         <attr name="sucFooterBarMinHeight" format="dimension" />
         <attr name="sucFooterBarButtonMiddleSpacing" format="dimension" />
         <attr name="sucFooterBarButtonFontWeight" format="integer" />
+        <attr name="sucFooterBarButtonTextSize" format="dimension" />
+        <attr name="sucFooterButtonTextLineSpacingExtra" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="SucHeaderMixin">

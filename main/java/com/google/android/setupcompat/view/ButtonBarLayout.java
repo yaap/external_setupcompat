@@ -136,8 +136,15 @@ public class ButtonBarLayout extends LinearLayout {
     }
 
     if (stacked) {
-      // When stacked, the buttons need to be kept in the center of the button bar.
-      setHorizontalGravity(Gravity.CENTER);
+      if (getContext().getResources().getBoolean(R.bool.sucTwoPaneLayoutStyle)
+          && PartnerConfigHelper.isGlifExpressiveEnabled(getContext())) {
+        // When device in the two pane mode and glif expressive flag enabled, the button should
+        // aligned to the end.
+        setHorizontalGravity(Gravity.END);
+      } else {
+        // When stacked, the buttons need to be kept in the center of the button bar.
+        setHorizontalGravity(Gravity.CENTER);
+      }
       // HACK: In the default button bar style, the left and right paddings are not
       // balanced to compensate for different alignment for borderless (left) button and
       // the raised (right) button. When it's stacked, we want the buttons to be centered,
