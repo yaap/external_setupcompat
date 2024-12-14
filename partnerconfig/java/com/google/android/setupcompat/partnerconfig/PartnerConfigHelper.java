@@ -41,7 +41,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.window.embedding.ActivityEmbeddingController;
 import com.google.android.setupcompat.partnerconfig.PartnerConfig.ResourceType;
 import com.google.android.setupcompat.util.BuildCompatUtils;
-import com.google.android.setupcompat.util.WizardManagerHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -1170,13 +1169,6 @@ public class PartnerConfigHelper {
 
     if (applyGlifExpressiveBundle == null || applyGlifExpressiveBundle.isEmpty()) {
       try {
-        Activity activity = lookupActivityFromContext(context);
-        // Save inside/outside setup wizard flag into bundle
-        Bundle extras = new Bundle();
-        extras.putBoolean(
-            WizardManagerHelper.EXTRA_IS_SETUP_FLOW,
-            WizardManagerHelper.isAnySetupWizard(activity.getIntent()));
-
         applyGlifExpressiveBundle =
             context
                 .getContentResolver()
@@ -1184,7 +1176,7 @@ public class PartnerConfigHelper {
                     getContentUri(),
                     IS_GLIF_EXPRESSIVE_ENABLED,
                     /* arg= */ null,
-                    /* extras= */ extras);
+                    /* extras= */ null);
       } catch (IllegalArgumentException | SecurityException exception) {
         Log.w(TAG, "isGlifExpressiveEnabled status is unknown; return as false.");
       }
@@ -1192,6 +1184,7 @@ public class PartnerConfigHelper {
     if (applyGlifExpressiveBundle != null && !applyGlifExpressiveBundle.isEmpty()) {
       return applyGlifExpressiveBundle.getBoolean(IS_GLIF_EXPRESSIVE_ENABLED, false);
     }
+
     return false;
   }
 
