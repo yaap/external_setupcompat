@@ -129,6 +129,7 @@
         <item name="android:insetBottom">0dp</item>
         <item name="android:textSize">?attr/sucFooterBarButtonTextSize</item>
         <item name="android:lineSpacingExtra">?attr/sucFooterButtonTextLineSpacingExtra</item>
+        <item name="strokeColor">?attr/sucFooterBarButtonOutlinedColor</item>
 
         <!-- Values used in themes -->
         <item name="android:buttonCornerRadius" tools:ignore="NewApi">?attr/sucFooterBarButtonCornerRadius</item>

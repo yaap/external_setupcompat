@@ -32,15 +32,12 @@ import android.text.Layout.Alignment;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -110,6 +107,8 @@ public class FooterBarMixin implements Mixin {
   private final int footerBarSecondaryButtonEnabledTextColor;
   private final int footerBarPrimaryButtonDisabledTextColor;
   private final int footerBarSecondaryButtonDisabledTextColor;
+
+  private boolean isButtonTextOverFlowing;
   @VisibleForTesting final int footerBarButtonMiddleSpacing;
 
   @VisibleForTesting public final FooterBarMixinMetrics metrics = new FooterBarMixinMetrics();
@@ -725,7 +724,6 @@ public class FooterBarMixin implements Mixin {
     }
 
     setEvenlyWeightedButtons(tempPrimaryButton, tempSecondaryButton, isEvenlyWeightedButtons);
-
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
       setButtonWidthForExpressiveStyle();
     }
@@ -768,131 +766,124 @@ public class FooterBarMixin implements Mixin {
   // TODO: b/369285240 - Migrate setButtonWidthForExpressiveStyle of FooterBarMixin to
   /** Sets button width for expressive style. */
   public void setButtonWidthForExpressiveStyle() {
-    final ViewTreeObserver.OnGlobalLayoutListener onFooterContainerLayout =
-        new OnGlobalLayoutListener() {
-          @Override
-          public void onGlobalLayout() {
-            buttonContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            Button primaryButton = getPrimaryButtonView();
-            Button secondaryButton = getSecondaryButtonView();
-            DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-            int screenWidth = displayMetrics.widthPixels;
-            if (isTwoPaneLayout()) {
-              screenWidth = screenWidth / 2;
-              buttonContainer.setGravity(Gravity.END);
-            }
-
-            // TODO: b/364981820 - Use partner config to allow user to customize button width.
-            int availableFooterBarWidth =
-                screenWidth
-                    - footerBarPaddingStart
-                    - footerBarPaddingEnd
-                    - footerBarButtonMiddleSpacing;
-            int maxButtonWidth = availableFooterBarWidth / 2;
-            if (isBothButtons(primaryButton, secondaryButton)) {
-              LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
-              LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
-
-              boolean isPrimaryTextTooLong = isTextTooLong(primaryButton, maxButtonWidth);
-              boolean isSecondaryTextTooLong = isTextTooLong(secondaryButton, maxButtonWidth);
-
-              if (isPrimaryTextTooLong || isSecondaryTextTooLong) {
-                if (buttonContainer instanceof ButtonBarLayout) {
-                  ((ButtonBarLayout) buttonContainer).setStackedButtonForExpressiveStyle(true);
-                }
-                int stackButtonMiddleSpacing = footerBarButtonMiddleSpacing / 2;
-                primaryLayoutParams.width = availableFooterBarWidth;
-                primaryLayoutParams.bottomMargin = stackButtonMiddleSpacing;
-                primaryButton.setLayoutParams(primaryLayoutParams);
-
-                secondaryLayoutParams.width = availableFooterBarWidth;
-                secondaryLayoutParams.topMargin = stackButtonMiddleSpacing;
-                secondaryButton.setLayoutParams(secondaryLayoutParams);
-              } else {
-                if (primaryLayoutParams != null) {
-                  primaryLayoutParams.width = maxButtonWidth;
-                  primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
-                  primaryButton.setLayoutParams(primaryLayoutParams);
-                }
-                if (secondaryLayoutParams != null) {
-                  secondaryLayoutParams.width = maxButtonWidth;
-                  secondaryLayoutParams.setMarginEnd(footerBarButtonMiddleSpacing / 2);
-                  secondaryButton.setLayoutParams(secondaryLayoutParams);
-                }
-              }
-            } else if (isPrimaryButtonOnly(primaryButton, secondaryButton)) {
-              LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
-              if (primaryLayoutParams != null) {
-                primaryLayoutParams.width = availableFooterBarWidth;
-                primaryButton.setLayoutParams(primaryLayoutParams);
-              }
-            } else if (isSecondaryOnly(primaryButton, secondaryButton)) {
-              LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
-              if (secondaryLayoutParams != null) {
-                secondaryLayoutParams.width = availableFooterBarWidth;
-                secondaryButton.setLayoutParams(secondaryLayoutParams);
-              }
-            } else {
-              LOG.atInfo("There are no button visible in the footer bar.");
-            }
+    buttonContainer.post(
+        () -> {
+          int containerWidth = buttonContainer.getMeasuredWidth();
+          Button primaryButton = getPrimaryButtonView();
+          Button secondaryButton = getSecondaryButtonView();
+          if (isTwoPaneLayout()) {
+            containerWidth = containerWidth / 2;
+            buttonContainer.setGravity(Gravity.END);
           }
-        };
-    buttonContainer.getViewTreeObserver().addOnGlobalLayoutListener(onFooterContainerLayout);
+
+          // TODO: b/364981820 - Use partner config to allow user to customize button width.
+          int availableFooterBarWidth =
+              containerWidth
+                  - footerBarPaddingStart
+                  - footerBarPaddingEnd
+                  - footerBarButtonMiddleSpacing;
+          int maxButtonWidth = availableFooterBarWidth / 2;
+          if (isBothButtons(primaryButton, secondaryButton)) {
+            LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
+            LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
+
+            validateButtonTextLength(primaryButton, maxButtonWidth);
+            validateButtonTextLength(secondaryButton, maxButtonWidth);
+
+            if (isButtonTextOverFlowing) {
+              if (buttonContainer instanceof ButtonBarLayout buttonBarLayout) {
+                buttonBarLayout.setStackedButtonForExpressiveStyle(true);
+              }
+              int stackButtonMiddleSpacing = footerBarButtonMiddleSpacing / 2;
+              primaryLayoutParams.width = availableFooterBarWidth;
+              primaryLayoutParams.bottomMargin = stackButtonMiddleSpacing;
+              primaryButton.setLayoutParams(primaryLayoutParams);
+
+              secondaryLayoutParams.width = availableFooterBarWidth;
+              secondaryLayoutParams.topMargin = stackButtonMiddleSpacing;
+              secondaryButton.setLayoutParams(secondaryLayoutParams);
+            } else {
+              if (primaryLayoutParams != null) {
+                primaryLayoutParams.width = maxButtonWidth;
+                primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
+                primaryButton.setLayoutParams(primaryLayoutParams);
+              }
+              if (secondaryLayoutParams != null) {
+                secondaryLayoutParams.width = maxButtonWidth;
+                secondaryLayoutParams.setMarginEnd(footerBarButtonMiddleSpacing / 2);
+                secondaryButton.setLayoutParams(secondaryLayoutParams);
+              }
+            }
+          } else if (isPrimaryButtonOnly(primaryButton, secondaryButton)) {
+            LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
+            if (primaryLayoutParams != null) {
+              primaryLayoutParams.width = availableFooterBarWidth;
+              primaryButton.setLayoutParams(primaryLayoutParams);
+            }
+          } else if (isSecondaryOnly(primaryButton, secondaryButton)) {
+            LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
+            if (secondaryLayoutParams != null) {
+              secondaryLayoutParams.width = availableFooterBarWidth;
+              secondaryButton.setLayoutParams(secondaryLayoutParams);
+            }
+          } else {
+            LOG.atInfo("There are no button visible in the footer bar.");
+          }
+        });
   }
 
   /** Sets down button for expressive style. */
   public void setDownButtonForExpressiveStyle() {
-    final ViewTreeObserver.OnGlobalLayoutListener onContainerLayoutListener =
-        new OnGlobalLayoutListener() {
-          @Override
-          public void onGlobalLayout() {
-            buttonContainer.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            int containerWidth = buttonContainer.getMeasuredWidth();
-            // Only allow primary button been shown on the screen if in the down button style.
-            if (getSecondaryButtonView() != null) {
-              getSecondaryButtonView().setVisibility(View.GONE);
-            }
-            setDownButtonStyle(getPrimaryButtonView());
-            if (!isTwoPaneLayout()) {
-              buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-            } else {
-              buttonContainer.setGravity(Gravity.CENTER_VERTICAL);
-
-              Button downButtonView = getPrimaryButtonView();
-              LayoutParams primaryLayoutParams = (LayoutParams) downButtonView.getLayoutParams();
-              int downButtonWidth =
-                  context
-                      .getResources()
-                      .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
-              // Put down button to the center of the one side in two pane mode.
-              primaryLayoutParams.setMarginStart(
-                  (containerWidth / 2) + (containerWidth / 4) - (downButtonWidth / 2));
-              downButtonView.setLayoutParams(primaryLayoutParams);
-            }
+    buttonContainer.post(
+        () -> {
+          int containerWidth = buttonContainer.getMeasuredWidth();
+          // Only allow primary button been shown on the screen if in the down button style.
+          if (getSecondaryButtonView() != null) {
+            getSecondaryButtonView().setVisibility(View.GONE);
           }
-        };
-    buttonContainer.getViewTreeObserver().addOnGlobalLayoutListener(onContainerLayoutListener);
+          setDownButtonStyle(getPrimaryButtonView());
+          if (!isTwoPaneLayout()) {
+            buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+          } else {
+            buttonContainer.setGravity(Gravity.CENTER_VERTICAL);
+
+            Button downButtonView = getPrimaryButtonView();
+            LayoutParams primaryLayoutParams = (LayoutParams) downButtonView.getLayoutParams();
+            int downButtonWidth =
+                context
+                    .getResources()
+                    .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
+            // Put down button to the center of the one side in two pane mode.
+            primaryLayoutParams.setMarginStart(
+                (containerWidth / 2) + (containerWidth / 4) - downButtonWidth);
+            downButtonView.setLayoutParams(primaryLayoutParams);
+          }
+        });
   }
 
   // TODO: b/376153500 - Add a test case for button stack mechanism.
-  private boolean isTextTooLong(Button button, float maxButtonWidth) {
-    String text = button.getText().toString();
-    TextPaint textPaint = button.getPaint();
+  private void validateButtonTextLength(Button button, float maxButtonWidth) {
+    button.post(
+        () -> {
+          String text = button.getText().toString();
+          TextPaint textPaint = button.getPaint();
 
-    int buttonWidth = (int) maxButtonWidth - button.getPaddingLeft() - button.getPaddingRight();
+          int buttonWidth =
+              (int) maxButtonWidth - button.getPaddingLeft() - button.getPaddingRight();
 
-    // Generate a static layout to see if text requires switching lines.
-    StaticLayout staticLayout =
-        new StaticLayout(
-            text,
-            textPaint,
-            buttonWidth,
-            Alignment.ALIGN_CENTER,
-            /* spacingMult= */ 1.0f,
-            /* spacingAdd= */ 0.0f,
-            /* includePad= */ false);
-    return staticLayout.getLineCount() > 1;
-  }
+          // Generate a static layout to see if text requires switching lines.
+          StaticLayout staticLayout =
+              new StaticLayout(
+                  text,
+                  textPaint,
+                  Math.max(0, buttonWidth),
+                  Alignment.ALIGN_CENTER,
+                  /* spacingMult= */ 1.0f,
+                  /* spacingAdd= */ 0.0f,
+                  /* includePad= */ false);
+          isButtonTextOverFlowing = staticLayout.getLineCount() > 1;
+        });
+    }
 
   private boolean isTwoPaneLayout() {
     return context.getResources().getBoolean(R.bool.sucTwoPaneLayoutStyle);

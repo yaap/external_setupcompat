@@ -616,10 +616,10 @@ public class PartnerConfigHelper {
 
     if (BuildCompatUtils.isAtLeastU() && isActivityEmbedded(context)) {
       resourceEntry = adjustEmbeddedActivityResourceEntryDefaultValue(context, resourceEntry);
-    } else if (BuildCompatUtils.isAtLeastU() && isForceTwoPaneEnabled(context)) {
-      resourceEntry = adjustForceTwoPaneResourceEntryDefaultValue(context, resourceEntry);
     } else if (BuildCompatUtils.isAtLeastV() && isGlifExpressiveEnabled(context)) {
       resourceEntry = adjustGlifExpressiveResourceEntryDefaultValue(context, resourceEntry);
+    } else if (BuildCompatUtils.isAtLeastU() && isForceTwoPaneEnabled(context)) {
+      resourceEntry = adjustForceTwoPaneResourceEntryDefaultValue(context, resourceEntry);
     } else if (BuildCompatUtils.isAtLeastT() && shouldApplyMaterialYouStyle(context)) {
       resourceEntry = adjustMaterialYouResourceEntryDefaultValue(context, resourceEntry);
     }
