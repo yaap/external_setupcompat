@@ -90,6 +90,10 @@ public class PartnerConfigHelper {
   @VisibleForTesting
   public static final String IS_GLIF_EXPRESSIVE_ENABLED = "isGlifExpressiveEnabled";
 
+  @VisibleForTesting
+  public static final String IS_ENHANCED_SETUP_DESIGN_METRICS_ENABLED =
+      "isEnhancedSetupDesignMetricsEnabled";
+
   /** The method name to get the if the keyboard focus enhancement enabled */
   @VisibleForTesting
   public static final String IS_KEYBOARD_FOCUS_ENHANCEMENT_ENABLED_METHOD =
@@ -105,7 +109,7 @@ public class PartnerConfigHelper {
   @VisibleForTesting
   public static final String EMBEDDED_ACTIVITY_RESOURCE_SUFFIX = "_embedded_activity";
 
-  @VisibleForTesting static Bundle suwDayNightEnabledBundle = null;
+  @VisibleForTesting public static Bundle suwDayNightEnabledBundle = null;
 
   @VisibleForTesting public static Bundle applyExtendedPartnerConfigBundle = null;
 
@@ -144,6 +148,8 @@ public class PartnerConfigHelper {
   public static Bundle applyForceTwoPaneBundle = null;
 
   @VisibleForTesting public static Bundle applyGlifExpressiveBundle = null;
+
+  @VisibleForTesting public static Bundle enableMetricsLoggingBundle = null;
 
   @VisibleForTesting public static int savedOrientation = Configuration.ORIENTATION_PORTRAIT;
 
@@ -1183,6 +1189,32 @@ public class PartnerConfigHelper {
     }
     if (applyGlifExpressiveBundle != null && !applyGlifExpressiveBundle.isEmpty()) {
       return applyGlifExpressiveBundle.getBoolean(IS_GLIF_EXPRESSIVE_ENABLED, false);
+    }
+
+    return false;
+  }
+
+  /** Returns true if the SetupWizard enable the UI component logging. */
+  public static boolean isEnhancedSetupDesignMetricsEnabled(@NonNull Context context) {
+    if (enableMetricsLoggingBundle == null || enableMetricsLoggingBundle.isEmpty()) {
+      try {
+        enableMetricsLoggingBundle =
+            context
+                .getContentResolver()
+                .call(
+                    getContentUri(),
+                    IS_ENHANCED_SETUP_DESIGN_METRICS_ENABLED,
+                    /* arg= */ null,
+                    /* extras= */ null);
+      } catch (IllegalArgumentException | SecurityException exception) {
+        Log.w(TAG, "Method " + IS_ENHANCED_SETUP_DESIGN_METRICS_ENABLED + " is unknown");
+        enableMetricsLoggingBundle = null;
+        return false;
+      }
+    }
+
+    if (enableMetricsLoggingBundle != null && !enableMetricsLoggingBundle.isEmpty()) {
+      return enableMetricsLoggingBundle.getBoolean(IS_ENHANCED_SETUP_DESIGN_METRICS_ENABLED, false);
     }
 
     return false;

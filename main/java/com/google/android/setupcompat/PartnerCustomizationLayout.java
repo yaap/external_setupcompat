@@ -74,7 +74,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
    */
   private boolean useDynamicColor;
 
-  private Activity activity;
+  protected Activity activity;
 
   private PersistableBundle layoutTypeBundle;
 
