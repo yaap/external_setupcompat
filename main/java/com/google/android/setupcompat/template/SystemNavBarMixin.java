@@ -66,6 +66,12 @@ public class SystemNavBarMixin implements Mixin {
     this.useFullDynamicColor =
         layout instanceof PartnerCustomizationLayout
             && ((PartnerCustomizationLayout) layout).useFullDynamicColor();
+
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(layout.getContext()) && window != null) {
+      View docorView = window.getDecorView();
+      int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+      docorView.setSystemUiVisibility(uiOptions);
+    }
   }
 
   /**

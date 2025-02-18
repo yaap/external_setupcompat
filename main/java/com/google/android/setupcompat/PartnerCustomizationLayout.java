@@ -217,7 +217,13 @@ public class PartnerCustomizationLayout extends TemplateLayout {
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    LifecycleFragment.attachNow(activity);
+    LifecycleFragment lifecycleFragment = LifecycleFragment.attachNow(activity);
+    if (lifecycleFragment == null) {
+      LOG.atDebug(
+          "Unable to attach lifecycle fragment to the host activity. Activity="
+              + ((activity != null) ? activity.getClass().getSimpleName() : "null"));
+    }
+
     if (WizardManagerHelper.isAnySetupWizard(activity.getIntent())) {
       getViewTreeObserver().addOnWindowFocusChangeListener(windowFocusChangeListener);
     }

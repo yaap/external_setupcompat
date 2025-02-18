@@ -139,4 +139,12 @@
         <item name="viewInflaterClass">com.google.android.material.theme.MaterialComponentsViewInflater</item>
         <item name="sucMaterialOutlinedButtonStyle">@style/SucGlifMaterialButton.Secondary</item>
     </style>
+
+    <style name="SucGlifMaterialButton.Tonal" parent="Widget.Material3.Button.TonalButton.Icon">
+        <!-- This style can be applied to a button either as a "style" in XML, or as a theme in
+             ContextThemeWrapper. These self-referencing attributes make sure this is applied as
+             both to the button. -->
+        <item name="viewInflaterClass">com.google.android.material.theme.MaterialComponentsViewInflater</item>
+        <item name="sucMaterialTonalButtonStyle">@style/SucGlifMaterialButton.Tonal</item>
+     </style>
 </resources>

@@ -25,12 +25,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
-import android.text.Layout.Alignment;
-import android.text.StaticLayout;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -108,7 +106,6 @@ public class FooterBarMixin implements Mixin {
   private final int footerBarPrimaryButtonDisabledTextColor;
   private final int footerBarSecondaryButtonDisabledTextColor;
 
-  private boolean isButtonTextOverFlowing;
   @VisibleForTesting final int footerBarButtonMiddleSpacing;
 
   @VisibleForTesting public final FooterBarMixinMetrics metrics = new FooterBarMixinMetrics();
@@ -653,12 +650,21 @@ public class FooterBarMixin implements Mixin {
     // TODO: b/364981299 - Use partner config to allow user to customize text color.
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
       boolean enabled = secondaryButton.isEnabled();
-      updateTextColorForButton(
-          button,
-          enabled,
-          enabled
-              ? footerBarSecondaryButtonEnabledTextColor
-              : footerBarSecondaryButtonDisabledTextColor);
+      if (usePrimaryStyle) {
+        updateTextColorForButton(
+            button,
+            enabled,
+            enabled
+                ? footerBarPrimaryButtonEnabledTextColor
+                : footerBarPrimaryButtonDisabledTextColor);
+      } else {
+        updateTextColorForButton(
+            button,
+            enabled,
+            enabled
+                ? footerBarSecondaryButtonEnabledTextColor
+                : footerBarSecondaryButtonDisabledTextColor);
+      }
     }
     if (loggingObserver != null) {
       loggingObserver.log(new ButtonInflatedEvent(button, LoggingObserver.ButtonType.SECONDARY));
@@ -786,23 +792,11 @@ public class FooterBarMixin implements Mixin {
           if (isBothButtons(primaryButton, secondaryButton)) {
             LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
             LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
+            boolean isButtonStacked =
+                stackButtonIfTextOverFlow(
+                    primaryButton, secondaryButton, maxButtonWidth, availableFooterBarWidth);
 
-            validateButtonTextLength(primaryButton, maxButtonWidth);
-            validateButtonTextLength(secondaryButton, maxButtonWidth);
-
-            if (isButtonTextOverFlowing) {
-              if (buttonContainer instanceof ButtonBarLayout buttonBarLayout) {
-                buttonBarLayout.setStackedButtonForExpressiveStyle(true);
-              }
-              int stackButtonMiddleSpacing = footerBarButtonMiddleSpacing / 2;
-              primaryLayoutParams.width = availableFooterBarWidth;
-              primaryLayoutParams.bottomMargin = stackButtonMiddleSpacing;
-              primaryButton.setLayoutParams(primaryLayoutParams);
-
-              secondaryLayoutParams.width = availableFooterBarWidth;
-              secondaryLayoutParams.topMargin = stackButtonMiddleSpacing;
-              secondaryButton.setLayoutParams(secondaryLayoutParams);
-            } else {
+            if (!isButtonStacked) {
               if (primaryLayoutParams != null) {
                 primaryLayoutParams.width = maxButtonWidth;
                 primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
@@ -861,29 +855,76 @@ public class FooterBarMixin implements Mixin {
         });
   }
 
-  // TODO: b/376153500 - Add a test case for button stack mechanism.
-  private void validateButtonTextLength(Button button, float maxButtonWidth) {
-    button.post(
-        () -> {
-          String text = button.getText().toString();
-          TextPaint textPaint = button.getPaint();
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  boolean stackButtonIfTextOverFlow(
+      Button primaryButton,
+      Button secondaryButton,
+      float maxButtonWidth,
+      int availableFooterBarWidth) {
+    LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
+    LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
 
-          int buttonWidth =
-              (int) maxButtonWidth - button.getPaddingLeft() - button.getPaddingRight();
+    String primaryText = primaryButton.getText().toString();
+    Paint primaryTextPaint = new Paint();
 
-          // Generate a static layout to see if text requires switching lines.
-          StaticLayout staticLayout =
-              new StaticLayout(
-                  text,
-                  textPaint,
-                  Math.max(0, buttonWidth),
-                  Alignment.ALIGN_CENTER,
-                  /* spacingMult= */ 1.0f,
-                  /* spacingAdd= */ 0.0f,
-                  /* includePad= */ false);
-          isButtonTextOverFlowing = staticLayout.getLineCount() > 1;
-        });
+    primaryTextPaint.setTypeface(primaryButton.getTypeface());
+    primaryTextPaint.setTextSize(primaryButton.getTextSize());
+
+    float primaryButtonWidth =
+        primaryTextPaint.measureText(primaryText)
+            + primaryButton.getPaddingLeft()
+            + primaryButton.getPaddingRight()
+            + primaryButton.getPaddingStart()
+            + primaryButton.getPaddingEnd();
+
+    boolean isPrimaryButtonTextOverFlowing = primaryButtonWidth > maxButtonWidth;
+
+    LOG.atDebug(
+        "isPrimaryButtonTextOverFlowing= "
+            + isPrimaryButtonTextOverFlowing
+            + ", primaryButtonWidth= "
+            + primaryButtonWidth
+            + ", maxButtonWidth= "
+            + maxButtonWidth);
+
+    String secondaryText = secondaryButton.getText().toString();
+    Paint secondaryTextPaint = new Paint();
+
+    secondaryTextPaint.setTypeface(secondaryButton.getTypeface());
+    secondaryTextPaint.setTextSize(secondaryButton.getTextSize());
+    float secondaryButtonWidth =
+        secondaryTextPaint.measureText(secondaryText)
+            + secondaryButton.getPaddingLeft()
+            + secondaryButton.getPaddingRight()
+            + secondaryButton.getPaddingStart()
+            + secondaryButton.getPaddingEnd();
+
+    boolean isSecondaryButtonTextOverFlowing = secondaryButtonWidth > maxButtonWidth;
+
+    LOG.atDebug(
+        "isSecondaryButtonTextOverFlowing= "
+            + isSecondaryButtonTextOverFlowing
+            + ", secondaryButtonWidth= "
+            + secondaryButtonWidth
+            + ", maxButtonWidth= "
+            + maxButtonWidth);
+
+    if (isPrimaryButtonTextOverFlowing || isSecondaryButtonTextOverFlowing) {
+      if (buttonContainer instanceof ButtonBarLayout buttonBarLayout) {
+        buttonBarLayout.setStackedButtonForExpressiveStyle(true);
+        int stackButtonMiddleSpacing = footerBarButtonMiddleSpacing / 2;
+        secondaryLayoutParams.width = availableFooterBarWidth;
+        secondaryLayoutParams.topMargin = stackButtonMiddleSpacing;
+        secondaryButton.setLayoutParams(secondaryLayoutParams);
+
+        primaryLayoutParams.width = availableFooterBarWidth;
+        primaryLayoutParams.bottomMargin = stackButtonMiddleSpacing;
+        primaryButton.setLayoutParams(primaryLayoutParams);
+        return true;
+      }
     }
+    return false;
+  }
 
   private boolean isTwoPaneLayout() {
     return context.getResources().getBoolean(R.bool.sucTwoPaneLayoutStyle);
