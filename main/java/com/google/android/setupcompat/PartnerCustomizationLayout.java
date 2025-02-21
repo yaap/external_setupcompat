@@ -217,7 +217,8 @@ public class PartnerCustomizationLayout extends TemplateLayout {
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    LifecycleFragment lifecycleFragment = LifecycleFragment.attachNow(activity);
+    LifecycleFragment lifecycleFragment =
+        LifecycleFragment.attachNow(activity, this::logFooterButtonMetrics);
     if (lifecycleFragment == null) {
       LOG.atDebug(
           "Unable to attach lifecycle fragment to the host activity. Activity="
@@ -263,6 +264,42 @@ public class PartnerCustomizationLayout extends TemplateLayout {
           CustomEvent.create(MetricKey.get("SetupCompatMetrics", activity), persistableBundle));
     }
     getViewTreeObserver().removeOnWindowFocusChangeListener(windowFocusChangeListener);
+  }
+
+  private void logFooterButtonMetrics() {
+    if (VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        && activity != null
+        && WizardManagerHelper.isAnySetupWizard(activity.getIntent())
+        && PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(getContext())) {
+      FooterBarMixin footerBarMixin = getMixin(FooterBarMixin.class);
+
+      if (footerBarMixin == null
+          || (footerBarMixin.getPrimaryButton() == null
+              && footerBarMixin.getSecondaryButton() == null)) {
+        LOG.atDebug("Skip footer button logging because no footer buttons.");
+        return;
+      }
+
+      footerBarMixin.onDetachedFromWindow();
+      FooterButton primaryButton = footerBarMixin.getPrimaryButton();
+      FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
+      PersistableBundle primaryButtonMetrics =
+          primaryButton != null
+              ? primaryButton.getMetrics("PrimaryFooterButton")
+              : PersistableBundle.EMPTY;
+      PersistableBundle secondaryButtonMetrics =
+          secondaryButton != null
+              ? secondaryButton.getMetrics("SecondaryFooterButton")
+              : PersistableBundle.EMPTY;
+
+      PersistableBundle persistableBundle =
+          PersistableBundles.mergeBundles(
+              footerBarMixin.getLoggingMetrics(), primaryButtonMetrics, secondaryButtonMetrics);
+
+      SetupMetricsLogger.logCustomEvent(
+          getContext(),
+          CustomEvent.create(MetricKey.get("FooterButtonMetrics", activity), persistableBundle));
+    }
   }
 
   /**
