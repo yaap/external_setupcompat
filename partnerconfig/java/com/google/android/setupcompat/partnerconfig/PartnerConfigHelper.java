@@ -858,6 +858,7 @@ public class PartnerConfigHelper {
     applyForceTwoPaneBundle = null;
     applyGlifExpressiveBundle = null;
     keyboardFocusEnhancementBundle = null;
+    enableMetricsLoggingBundle = null;
   }
 
   /**

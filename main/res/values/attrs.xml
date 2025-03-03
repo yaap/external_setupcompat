@@ -123,4 +123,6 @@
 
     <attr name="sucMaterialButtonStyle" format="reference" />
 
+    <attr name="sucMaterialTonalButtonStyle" format="reference" />
+
 </resources>
