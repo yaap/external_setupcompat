@@ -20,6 +20,9 @@
     <!-- ID used with View#setTag to store the original weight on a ButtonBar -->
     <item name="suc_customization_original_weight" type="id" />
 
+    <!-- A boolean value that indicates whether the device should show two panes. -->
+    <bool name="sucTwoPaneLayoutStyle">false</bool>
+
     <!-- Pixel theme -->
     <string name="setup_design_layout_gravity">start</string>
     <integer name="setup_design_header_auto_size_max_line_of_max_size">2</integer>
