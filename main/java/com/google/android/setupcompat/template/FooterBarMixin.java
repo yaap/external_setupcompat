@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
+import androidx.fragment.app.Fragment;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -105,6 +106,10 @@ public class FooterBarMixin implements Mixin {
   private final int footerBarSecondaryButtonEnabledTextColor;
   private final int footerBarPrimaryButtonDisabledTextColor;
   private final int footerBarSecondaryButtonDisabledTextColor;
+  private static final String KEY_HOST_FRAGMENT_NAME = "HostFragmentName";
+  private static final String KEY_HOST_FRAGMENT_TAG = "HostFragmentTag";
+  private String hostFragmentName;
+  private String hostFragmentTag;
 
   @VisibleForTesting final int footerBarButtonMiddleSpacing;
 
@@ -278,6 +283,13 @@ public class FooterBarMixin implements Mixin {
       setPrimaryButton(inflater.inflate(primaryBtn));
       metrics.logSecondaryButtonInitialStateVisibility(
           /* isVisible= */ true, /* isUsingXml= */ true);
+    }
+  }
+
+  public void setFragmentInfo(@Nullable Fragment fragment) {
+    if (fragment != null) {
+      hostFragmentName = fragment.getClass().getSimpleName();
+      hostFragmentTag = fragment.getTag();
     }
   }
 
@@ -1255,7 +1267,17 @@ public class FooterBarMixin implements Mixin {
    */
   @TargetApi(VERSION_CODES.Q)
   public PersistableBundle getLoggingMetrics() {
-    return metrics.getMetrics();
+    LOG.atDebug("FooterBarMixin fragment name=" + hostFragmentName + ", Tag=" + hostFragmentTag);
+    PersistableBundle persistableBundle = metrics.getMetrics();
+    if (PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(context)) {
+      if (hostFragmentName != null) {
+        persistableBundle.putString(KEY_HOST_FRAGMENT_NAME, hostFragmentName);
+      }
+      if (hostFragmentTag != null) {
+        persistableBundle.putString(KEY_HOST_FRAGMENT_TAG, hostFragmentTag);
+      }
+    }
+    return persistableBundle;
   }
 
   private void updateTextColorForButton(Button button, boolean enable, int color) {

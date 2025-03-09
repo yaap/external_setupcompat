@@ -23,6 +23,10 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +56,7 @@ import com.google.android.setupcompat.util.BuildCompatUtils;
 import com.google.android.setupcompat.util.Logger;
 import com.google.android.setupcompat.util.WizardManagerHelper;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import org.jspecify.annotations.NonNull;
 
 /** A templatization layout with consistent style used in Setup Wizard or app itself. */
 public class PartnerCustomizationLayout extends TemplateLayout {
@@ -80,6 +85,8 @@ public class PartnerCustomizationLayout extends TemplateLayout {
   protected Activity activity;
 
   private PersistableBundle layoutTypeBundle;
+
+  @VisibleForTesting FragmentLifecycleCallbacks fragmentLifecycleCallbacks;
 
   private int footerBarPaddingBottom;
 
@@ -186,6 +193,13 @@ public class PartnerCustomizationLayout extends TemplateLayout {
 
     activity = lookupActivityFromContext(getContext());
 
+    LOG.atDebug(
+        "Flag of isEnhancedSetupDesignMetricsEnabled="
+            + PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(getContext()));
+    if (PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(getContext())) {
+      tryRegisterFragmentCallbacks(activity);
+    }
+
     boolean isSetupFlow = WizardManagerHelper.isAnySetupWizard(activity.getIntent());
 
     TypedArray a =
@@ -221,6 +235,28 @@ public class PartnerCustomizationLayout extends TemplateLayout {
             + useDynamicColor
             + " useFullDynamicColorAttr="
             + useFullDynamicColorAttr);
+  }
+
+  private void printFragmentInfoAtDebug(Fragment fragment, String tag) {
+    if (fragment == null) {
+      return;
+    }
+    int fragmentId = fragment.getId();
+    String fragmentName = tryGetResourceEntryName(fragmentId);
+    LOG.atDebug(
+        tag
+            + " fragment name="
+            + fragment.getClass().getSimpleName()
+            + ", tag="
+            + fragment.getTag()
+            + ", id="
+            + fragment.getId()
+            + ", name="
+            + fragmentName);
+  }
+
+  private String tryGetResourceEntryName(int fragmentId) {
+    return (fragmentId == 0) ? "" : getResources().getResourceEntryName(fragmentId);
   }
 
   @Override
@@ -281,6 +317,10 @@ public class PartnerCustomizationLayout extends TemplateLayout {
           CustomEvent.create(MetricKey.get("SetupCompatMetrics", activity), persistableBundle));
     }
     getViewTreeObserver().removeOnWindowFocusChangeListener(windowFocusChangeListener);
+
+    if (PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(getContext())) {
+      tryUnregisterFragmentCallbacks(activity);
+    }
   }
 
   private void logFooterButtonMetrics() {
@@ -316,6 +356,36 @@ public class PartnerCustomizationLayout extends TemplateLayout {
       SetupMetricsLogger.logCustomEvent(
           getContext(),
           CustomEvent.create(MetricKey.get("FooterButtonMetrics", activity), persistableBundle));
+    }
+  }
+
+  private void tryRegisterFragmentCallbacks(Activity activity) {
+    if ((activity instanceof FragmentActivity fragmentActivity)) {
+      fragmentLifecycleCallbacks =
+          new FragmentLifecycleCallbacks() {
+            @Override
+            public void onFragmentAttached(
+                @NonNull FragmentManager fm, @NonNull Fragment f, @NonNull Context context) {
+              printFragmentInfoAtDebug(f, "onFragmentAttached");
+              getMixin(FooterBarMixin.class).setFragmentInfo(f);
+              super.onFragmentAttached(fm, f, context);
+            }
+          };
+
+      fragmentActivity
+          .getSupportFragmentManager()
+          .registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true);
+      LOG.atDebug(
+          "Register the onFragmentAttached lifecycle callbacks to "
+              + activity.getClass().getSimpleName());
+    }
+  }
+
+  private void tryUnregisterFragmentCallbacks(Activity activity) {
+    if ((activity instanceof FragmentActivity fragmentActivity)) {
+      fragmentActivity
+          .getSupportFragmentManager()
+          .unregisterFragmentLifecycleCallbacks(fragmentLifecycleCallbacks);
     }
   }
 

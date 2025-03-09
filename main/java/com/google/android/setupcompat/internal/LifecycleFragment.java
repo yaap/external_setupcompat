@@ -105,6 +105,8 @@ public class LifecycleFragment extends Fragment {
         }
       }
     }
+    LOG.atDebug(
+        "Skip attach " + activity.getClass().getSimpleName() + " because it's not in SUW flow.");
     return null;
   }
 
