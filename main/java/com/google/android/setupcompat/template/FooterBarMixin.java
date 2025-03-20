@@ -27,6 +27,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
 import androidx.fragment.app.Fragment;
@@ -55,6 +56,7 @@ import com.google.android.setupcompat.PartnerCustomizationLayout;
 import com.google.android.setupcompat.R;
 import com.google.android.setupcompat.internal.FooterButtonPartnerConfig;
 import com.google.android.setupcompat.internal.TemplateLayout;
+import com.google.android.setupcompat.logging.CustomEvent;
 import com.google.android.setupcompat.logging.LoggingObserver;
 import com.google.android.setupcompat.logging.LoggingObserver.SetupCompatUiEvent.ButtonInflatedEvent;
 import com.google.android.setupcompat.logging.internal.FooterBarMixinMetrics;
@@ -166,15 +168,24 @@ public class FooterBarMixin implements Mixin {
       public void onVisibilityChanged(int visibility) {
         if (buttonContainer != null) {
           Button button = buttonContainer.findViewById(id);
-          if (button != null) {
-            button.setVisibility(visibility);
-            autoSetButtonBarVisibility();
 
-            if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
-              // Re-layout the buttons when visibility changes, especially when tertiary button is
-              // enabled to avoid the button layout is not correct.
-              repopulateButtons();
-            }
+          if (button == null) {
+            LOG.atDebug("onVisibilityChanged: button is null, skiped.");
+            return;
+          }
+
+          if (button.getVisibility() == visibility) {
+            LOG.atDebug("onVisibilityChanged: button visibility is not changed, skiped.");
+            return;
+          }
+
+          button.setVisibility(visibility);
+          autoSetButtonBarVisibility();
+
+          if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
+            // Re-layout the buttons when visibility changes, especially when tertiary button is
+            // enabled to avoid the button layout is not correct.
+            repopulateButtons();
           }
         }
       }
@@ -1442,15 +1453,19 @@ public class FooterBarMixin implements Mixin {
    * Assigns logging metrics to bundle for PartnerCustomizationLayout to log metrics to SetupWizard.
    */
   @TargetApi(VERSION_CODES.Q)
+  @SuppressLint("ObsoleteSdkInt")
   public PersistableBundle getLoggingMetrics() {
     LOG.atDebug("FooterBarMixin fragment name=" + hostFragmentName + ", Tag=" + hostFragmentTag);
     PersistableBundle persistableBundle = metrics.getMetrics();
-    if (PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(context)) {
+    if (VERSION.SDK_INT >= VERSION_CODES.Q
+        && PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(context)) {
       if (hostFragmentName != null) {
-        persistableBundle.putString(KEY_HOST_FRAGMENT_NAME, hostFragmentName);
+        persistableBundle.putString(
+            KEY_HOST_FRAGMENT_NAME, CustomEvent.trimsStringOverMaxLength(hostFragmentName));
       }
       if (hostFragmentTag != null) {
-        persistableBundle.putString(KEY_HOST_FRAGMENT_TAG, hostFragmentTag);
+        persistableBundle.putString(
+            KEY_HOST_FRAGMENT_TAG, CustomEvent.trimsStringOverMaxLength(hostFragmentTag));
       }
     }
     return persistableBundle;

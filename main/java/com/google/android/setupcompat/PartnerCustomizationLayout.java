@@ -323,7 +323,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
     }
   }
 
-  private void logFooterButtonMetrics() {
+  private void logFooterButtonMetrics(PersistableBundle bundle) {
     if (VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && activity != null
         && WizardManagerHelper.isAnySetupWizard(activity.getIntent())
@@ -351,7 +351,10 @@ public class PartnerCustomizationLayout extends TemplateLayout {
 
       PersistableBundle persistableBundle =
           PersistableBundles.mergeBundles(
-              footerBarMixin.getLoggingMetrics(), primaryButtonMetrics, secondaryButtonMetrics);
+              footerBarMixin.getLoggingMetrics(),
+              primaryButtonMetrics,
+              secondaryButtonMetrics,
+              bundle);
 
       SetupMetricsLogger.logCustomEvent(
           getContext(),
