@@ -502,21 +502,31 @@ public class PartnerCustomizationLayout extends TemplateLayout {
         LOG.atDebug("NavigationBarHeight: " + insets.getSystemWindowInsetBottom());
         FooterBarMixin footerBarMixin = getMixin(FooterBarMixin.class);
         LinearLayout buttonContainer = footerBarMixin.getButtonContainer();
-        if (footerBarMixin != null && footerBarMixin.getButtonContainer() != null) {
-          if (PartnerConfigHelper.get(getContext())
-              .isPartnerConfigAvailable(PartnerConfig.CONFIG_FOOTER_BUTTON_PADDING_BOTTOM)) {
+        View view = findViewById(R.id.suc_layout_status);
+        if (PartnerConfigHelper.get(getContext())
+            .isPartnerConfigAvailable(PartnerConfig.CONFIG_FOOTER_BUTTON_PADDING_BOTTOM)) {
             footerBarPaddingBottom =
                 (int)
                     PartnerConfigHelper.get(getContext())
                         .getDimension(
                             getContext(), PartnerConfig.CONFIG_FOOTER_BUTTON_PADDING_BOTTOM);
           }
+        if (footerBarMixin != null
+            && footerBarMixin.getButtonContainer() != null
+            && footerBarMixin.getButtonContainer().getVisibility() != View.GONE) {
           // Adjust footer bar padding to account for the navigation bar, ensuring
           // it extends to the bottom of the screen and with proper bottom padding.
           buttonContainer.setPadding(
               buttonContainer.getPaddingLeft(),
               buttonContainer.getPaddingTop(),
               buttonContainer.getPaddingRight(),
+              footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+          view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), 0);
+        } else {
+          view.setPadding(
+              view.getPaddingLeft(),
+              view.getPaddingTop(),
+              view.getPaddingRight(),
               footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
         }
       }

@@ -353,6 +353,10 @@ public enum PartnerConfig {
   CONFIG_ITEMS_SUMMARY_FONT_FAMILY(
       PartnerConfigKey.KEY_ITEMS_SUMMARY_FONT_FAMILY, ResourceType.STRING),
 
+  // Font variation_settings of the list items title.
+  CONFIG_ITEMS_TITLE_FONT_VARIATION_SETTINGS(
+      PartnerConfigKey.KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS, ResourceType.STRING),
+
   // The padding top of list items.
   CONFIG_ITEMS_PADDING_TOP(PartnerConfigKey.KEY_ITEMS_PADDING_TOP, ResourceType.DIMENSION),
 

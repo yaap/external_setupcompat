@@ -857,6 +857,11 @@ public class FooterBarMixin implements Mixin {
       addSpace();
     }
 
+    // Hide the button container when setting expressive button style to avoid button flickers.
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
+      buttonContainer.setVisibility(View.INVISIBLE);
+    }
+
     if (tempSecondaryButton != null) {
       if (isSecondaryButtonInPrimaryStyle) {
         // Since the secondary button has the same style (with background) as the primary button,
@@ -985,6 +990,8 @@ public class FooterBarMixin implements Mixin {
           } else {
             LOG.atInfo("There are no button visible in the footer bar.");
           }
+          // Show the button container when button set up is done.
+          buttonContainer.setVisibility(View.VISIBLE);
         });
   }
 
@@ -1083,6 +1090,20 @@ public class FooterBarMixin implements Mixin {
         primaryLayoutParams.bottomMargin = stackButtonMiddleSpacing;
         primaryButton.setLayoutParams(primaryLayoutParams);
         return true;
+      }
+    } else {
+      // Button is not stacked, we need to set the button width and margin to be side by side.
+      if (buttonContainer instanceof ButtonBarLayout buttonBarLayout) {
+        buttonBarLayout.setStackedButtonForExpressiveStyle(false);
+        primaryLayoutParams.width = availableFooterBarWidth;
+        primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
+        primaryLayoutParams.bottomMargin = 0;
+        primaryButton.setLayoutParams(primaryLayoutParams);
+
+        secondaryLayoutParams.width = availableFooterBarWidth;
+        secondaryLayoutParams.setMarginEnd(footerBarButtonMiddleSpacing / 2);
+        secondaryLayoutParams.topMargin = 0;
+        secondaryButton.setLayoutParams(secondaryLayoutParams);
       }
     }
     return false;
@@ -1420,6 +1441,14 @@ public class FooterBarMixin implements Mixin {
       return;
     }
     buttonContainer.setPadding(left, top, right, bottom);
+
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
+      // Adjust footer bar padding to account for the navigation bar, ensuring it extends to the
+      // bottom of the screen and with proper bottom padding.
+      if (VERSION.SDK_INT >= VERSION_CODES.KITKAT_WATCH) {
+        buttonContainer.requestApplyInsets();
+      }
+    }
   }
 
   /** Returns the paddingTop of footer bar. */

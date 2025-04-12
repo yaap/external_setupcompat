@@ -26,6 +26,7 @@ import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
+import com.google.android.setupcompat.R;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 import com.google.android.setupcompat.util.Logger;
 
@@ -107,7 +108,7 @@ public class StatusBarBackgroundLayout extends FrameLayout {
                 insets.getSystemWindowInsetLeft(),
                 insets.getSystemWindowInsetTop(),
                 insets.getSystemWindowInsetRight(),
-                /* bottom= */ 0);
+                findViewById(R.id.suc_layout_status).getPaddingBottom());
       }
     }
     lastInsets = insets;

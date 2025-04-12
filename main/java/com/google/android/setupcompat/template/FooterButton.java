@@ -235,11 +235,11 @@ public final class FooterButton implements OnClickListener {
   @Override
   public void onClick(View v) {
     if (onClickListener != null) {
-      clickCount++;
-      onClickListener.onClick(v);
       if (loggingObserver != null) {
         loggingObserver.log(new ButtonInteractionEvent(v, InteractionType.TAP));
       }
+      clickCount++;
+      onClickListener.onClick(v);
     }
   }
 
