@@ -959,6 +959,15 @@ public class FooterBarMixin implements Mixin {
           } else if (isBothButtons(primaryButton, secondaryButton)) {
             LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
             LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
+
+            // Minus the button padding start and end to get the available width for the two
+            // buttons.
+            availableFooterBarWidth =
+                availableFooterBarWidth
+                    - primaryLayoutParams.getMarginStart()
+                    - secondaryLayoutParams.getMarginEnd();
+            maxButtonWidth = availableFooterBarWidth / 2;
+
             boolean isButtonStacked =
                 stackButtonIfTextOverFlow(
                     primaryButton, secondaryButton, maxButtonWidth, availableFooterBarWidth);
