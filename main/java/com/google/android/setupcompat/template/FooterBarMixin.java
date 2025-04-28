@@ -115,6 +115,7 @@ public class FooterBarMixin implements Mixin {
   private static final String KEY_HOST_FRAGMENT_TAG = "HostFragmentTag";
   private String hostFragmentName;
   private String hostFragmentTag;
+  private int containerVisibility;
 
   @VisibleForTesting final int footerBarButtonMiddleSpacing;
 
@@ -857,9 +858,12 @@ public class FooterBarMixin implements Mixin {
       addSpace();
     }
 
-    // Hide the button container when setting expressive button style to avoid button flickers.
+    // Save the button container visibility and set button container to invisible if it is visible.
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
-      buttonContainer.setVisibility(View.INVISIBLE);
+      containerVisibility = buttonContainer.getVisibility();
+      if (containerVisibility == View.VISIBLE) {
+        buttonContainer.setVisibility(View.INVISIBLE);
+      }
     }
 
     if (tempSecondaryButton != null) {
@@ -959,13 +963,6 @@ public class FooterBarMixin implements Mixin {
           } else if (isBothButtons(primaryButton, secondaryButton)) {
             LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
             LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
-
-            // Minus the button padding start and end to get the available width for the two
-            // buttons.
-            availableFooterBarWidth =
-                availableFooterBarWidth
-                    - primaryLayoutParams.getMarginStart()
-                    - secondaryLayoutParams.getMarginEnd();
             maxButtonWidth = availableFooterBarWidth / 2;
 
             boolean isButtonStacked =
@@ -973,6 +970,14 @@ public class FooterBarMixin implements Mixin {
                     primaryButton, secondaryButton, maxButtonWidth, availableFooterBarWidth);
 
             if (!isButtonStacked) {
+              // When the button is not stacked, the buttons require to consider the margins for the
+              // footer bar available width. The button margins might be set by default in the
+              // Material button style.
+              maxButtonWidth =
+                  (availableFooterBarWidth
+                          - primaryLayoutParams.getMarginStart()
+                          - secondaryLayoutParams.getMarginEnd())
+                      / 2;
               if (primaryLayoutParams != null) {
                 primaryLayoutParams.width = maxButtonWidth;
                 primaryLayoutParams.setMarginStart(footerBarButtonMiddleSpacing / 2);
@@ -999,8 +1004,8 @@ public class FooterBarMixin implements Mixin {
           } else {
             LOG.atInfo("There are no button visible in the footer bar.");
           }
-          // Show the button container when button set up is done.
-          buttonContainer.setVisibility(View.VISIBLE);
+          // Set back the button container visibility to its original state.
+          buttonContainer.setVisibility(containerVisibility);
         });
   }
 

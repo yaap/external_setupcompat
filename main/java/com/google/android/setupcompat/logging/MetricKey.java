@@ -17,6 +17,7 @@
 package com.google.android.setupcompat.logging;
 
 import static com.google.android.setupcompat.internal.Validations.assertLengthInRange;
+import static com.google.android.setupcompat.logging.CustomEvent.trimsStringOverMaxLength;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -32,7 +33,6 @@ import java.util.regex.Pattern;
  * values reported by the API consumer.
  */
 public final class MetricKey implements Parcelable {
-
   private static final String METRIC_KEY_BUNDLE_NAME_KEY = "MetricKey_name";
   private static final String METRIC_KEY_BUNDLE_SCREEN_NAME_KEY = "MetricKey_screenName";
   private static final String METRIC_KEY_BUNDLE_VERSION = "MetricKey_version";
@@ -69,8 +69,7 @@ public final class MetricKey implements Parcelable {
     // We only checked the length of customized screen name, by the reason if the screenName match
     // to the class name skip check it
     if (!SCREEN_COMPONENTNAME_PATTERN.matcher(screenName).matches()) {
-      assertLengthInRange(
-          screenName, "MetricKey.screenName", MIN_SCREEN_NAME_LENGTH, MAX_SCREEN_NAME_LENGTH);
+      screenName = trimsStringOverMaxLength(screenName, MAX_SCREEN_NAME_LENGTH);
       Preconditions.checkArgument(
           SCREEN_NAME_PATTERN.matcher(screenName).matches(),
           "Invalid ScreenName, only alpha numeric characters are allowed.");
@@ -162,12 +161,11 @@ public final class MetricKey implements Parcelable {
   private final String name;
   private final String screenName;
 
-  private static final int MIN_SCREEN_NAME_LENGTH = 5;
   private static final int MIN_METRIC_KEY_LENGTH = 5;
-  private static final int MAX_SCREEN_NAME_LENGTH = 50;
+  private static final int MAX_SCREEN_NAME_LENGTH = 200;
   private static final int MAX_METRIC_KEY_LENGTH = 30;
   private static final Pattern METRIC_KEY_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]+");
   private static final Pattern SCREEN_COMPONENTNAME_PATTERN =
-      Pattern.compile("^([a-z]+[.])+[A-Z][a-zA-Z0-9]+");
-  private static final Pattern SCREEN_NAME_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]+");
+      Pattern.compile("^([a-z]+[.])+[A-Z][a-zA-Z0-9_$]+");
+  private static final Pattern SCREEN_NAME_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_$]+");
 }

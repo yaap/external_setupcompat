@@ -151,10 +151,9 @@ public final class CustomEvent implements Parcelable {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof CustomEvent)) {
+    if (!(o instanceof CustomEvent that)) {
       return false;
     }
-    CustomEvent that = (CustomEvent) o;
     return timestampMillis == that.timestampMillis
         && ObjectUtils.equals(metricKey, that.metricKey)
         && PersistableBundles.equals(persistableBundle, that.persistableBundle)
@@ -176,7 +175,7 @@ public final class CustomEvent implements Parcelable {
     Preconditions.checkNotNull(bundle, "Bundle cannot be null.");
     Preconditions.checkArgument(!bundle.isEmpty(), "Bundle cannot be empty.");
     Preconditions.checkNotNull(piiValues, "piiValues cannot be null.");
-    assertPersistableBundleIsValid(bundle);
+    tryTrimStringOverMaxLengthInPersistableBundle(bundle);
     this.timestampMillis = timestampMillis;
     this.metricKey = metricKey;
     this.persistableBundle = new PersistableBundle(bundle);
@@ -188,33 +187,51 @@ public final class CustomEvent implements Parcelable {
   private final PersistableBundle persistableBundle;
   private final PersistableBundle piiValues;
 
-  private static void assertPersistableBundleIsValid(PersistableBundle bundle) {
+  @VisibleForTesting
+  static void tryTrimStringOverMaxLengthInPersistableBundle(PersistableBundle bundle) {
     for (String key : bundle.keySet()) {
       assertLengthInRange(key, "bundle key", MIN_BUNDLE_KEY_LENGTH, MAX_STR_LENGTH);
       Object value = bundle.get(key);
-      if (value instanceof String) {
-        Preconditions.checkArgument(
-            ((String) value).length() <= MAX_STR_LENGTH,
-            String.format(
-                "Maximum length of string value for key='%s' cannot exceed %s.",
-                key, MAX_STR_LENGTH));
+      if (value instanceof String stringValue) {
+        if (stringValue.length() > MAX_STR_LENGTH) {
+          stringValue = trimsStringOverMaxLength(stringValue);
+          bundle.putString(key, stringValue);
+        }
       }
     }
   }
 
   /**
-   * Trims the string longer than {@code MAX_STR_LENGTH} character, only keep the first {@code
-   * MAX_STR_LENGTH} - 1 characters and attached … in the end.
+   * Trims the string longer than {@code MAX_STR_LENGTH} character, only keep the last {@code
+   * MAX_STR_LENGTH} characters and add "truncated." prefix in the start.
+   *
+   * @param str the string to be trimmed
+   * @param maxLength the max length of the string. If it is less than {@code MAX_STR_LENGTH}, it
+   *     will be set to {@code MAX_STR_LENGTH}.
+   * @return the trimmed string
    */
   @NonNull
-  public static String trimsStringOverMaxLength(@NonNull String str) {
-    if (str.length() <= MAX_STR_LENGTH) {
+  public static String trimsStringOverMaxLength(@NonNull String str, int maxLength) {
+    if (maxLength < MAX_STR_LENGTH) {
+      maxLength = MAX_STR_LENGTH;
+    }
+
+    if (str.length() <= maxLength) {
       return str;
     } else {
-      return String.format("%s…", str.substring(0, MAX_STR_LENGTH - 1));
+      // Adding a prefix after trimming.
+      return PREFIX_AFTER_TRIM
+          + str.substring(str.length() - maxLength + PREFIX_AFTER_TRIM.length());
     }
   }
 
-  @VisibleForTesting public static final int MAX_STR_LENGTH = 50;
-  @VisibleForTesting static final int MIN_BUNDLE_KEY_LENGTH = 3;
+  @NonNull
+  public static String trimsStringOverMaxLength(@NonNull String str) {
+    return trimsStringOverMaxLength(str, MAX_STR_LENGTH);
+  }
+
+  public static final int MAX_STR_LENGTH = 50;
+  public static final int MIN_BUNDLE_KEY_LENGTH = 3;
+
+  public static final String PREFIX_AFTER_TRIM = "truncated.";
 }
