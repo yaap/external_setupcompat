@@ -271,7 +271,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
     LifecycleFragment lifecycleFragment =
-        LifecycleFragment.attachNow(activity, this::logFooterButtonMetrics);
+        LifecycleFragment.attachNow(activity, this::logMetricsOnFragmentStop);
     if (lifecycleFragment == null) {
       LOG.atDebug(
           "Unable to attach lifecycle fragment to the host activity. Activity="
@@ -290,31 +290,45 @@ public class PartnerCustomizationLayout extends TemplateLayout {
     if (VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && WizardManagerHelper.isAnySetupWizard(activity.getIntent())) {
       FooterBarMixin footerBarMixin = getMixin(FooterBarMixin.class);
-      footerBarMixin.onDetachedFromWindow();
-      FooterButton primaryButton = footerBarMixin.getPrimaryButton();
-      FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
-      PersistableBundle primaryButtonMetrics =
-          primaryButton != null
-              ? primaryButton.getMetrics("PrimaryFooterButton")
-              : PersistableBundle.EMPTY;
-      PersistableBundle secondaryButtonMetrics =
-          secondaryButton != null
-              ? secondaryButton.getMetrics("SecondaryFooterButton")
-              : PersistableBundle.EMPTY;
 
-      PersistableBundle layoutTypeMetrics =
-          (layoutTypeBundle != null) ? layoutTypeBundle : PersistableBundle.EMPTY;
+      if (footerBarMixin != null) {
+        footerBarMixin.onDetachedFromWindow();
+        FooterButton primaryButton = footerBarMixin.getPrimaryButton();
+        FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
+        PersistableBundle primaryButtonMetrics =
+            primaryButton != null
+                ? primaryButton.getMetrics("PrimaryFooterButton")
+                : PersistableBundle.EMPTY;
+        PersistableBundle secondaryButtonMetrics =
+            secondaryButton != null
+                ? secondaryButton.getMetrics("SecondaryFooterButton")
+                : PersistableBundle.EMPTY;
 
-      PersistableBundle persistableBundle =
-          PersistableBundles.mergeBundles(
-              footerBarMixin.getLoggingMetrics(),
-              primaryButtonMetrics,
-              secondaryButtonMetrics,
-              layoutTypeMetrics);
+        PersistableBundle layoutTypeMetrics =
+            (layoutTypeBundle != null) ? layoutTypeBundle : PersistableBundle.EMPTY;
 
-      SetupMetricsLogger.logCustomEvent(
-          getContext(),
-          CustomEvent.create(MetricKey.get("SetupCompatMetrics", activity), persistableBundle));
+        PersistableBundle onDetachedFromWindowMetrics = new PersistableBundle();
+        onDetachedFromWindowMetrics.putLong("onDetachedFromWindow", System.nanoTime());
+
+        PersistableBundle persistableBundle =
+            PersistableBundles.mergeBundles(
+                footerBarMixin.getLoggingMetrics(),
+                primaryButtonMetrics,
+                secondaryButtonMetrics,
+                layoutTypeMetrics,
+                onDetachedFromWindowMetrics);
+
+        SetupMetricsLogger.logCustomEvent(
+            getContext(),
+            CustomEvent.create(MetricKey.get("SetupCompatMetrics", activity), persistableBundle));
+      } else {
+        LOG.w("FooterBarMixin is null");
+        PersistableBundle presistableBundle = new PersistableBundle();
+        presistableBundle.putLong("onDetachedFromWindow", System.nanoTime());
+        SetupMetricsLogger.logCustomEvent(
+            getContext(),
+            CustomEvent.create(MetricKey.get("SetupCompatMetrics", activity), presistableBundle));
+      }
     }
     getViewTreeObserver().removeOnWindowFocusChangeListener(windowFocusChangeListener);
 
@@ -323,42 +337,42 @@ public class PartnerCustomizationLayout extends TemplateLayout {
     }
   }
 
-  private void logFooterButtonMetrics(PersistableBundle bundle) {
+  private void logMetricsOnFragmentStop(PersistableBundle bundle) {
     if (VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && activity != null
         && WizardManagerHelper.isAnySetupWizard(activity.getIntent())
         && PartnerConfigHelper.isEnhancedSetupDesignMetricsEnabled(getContext())) {
       FooterBarMixin footerBarMixin = getMixin(FooterBarMixin.class);
 
-      if (footerBarMixin == null
-          || (footerBarMixin.getPrimaryButton() == null
-              && footerBarMixin.getSecondaryButton() == null)) {
-        LOG.atDebug("Skip footer button logging because no footer buttons.");
-        return;
+      if (footerBarMixin != null) {
+        footerBarMixin.onDetachedFromWindow();
+        FooterButton primaryButton = footerBarMixin.getPrimaryButton();
+        FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
+        PersistableBundle primaryButtonMetrics =
+            primaryButton != null
+                ? primaryButton.getMetrics("PrimaryFooterButton")
+                : PersistableBundle.EMPTY;
+        PersistableBundle secondaryButtonMetrics =
+            secondaryButton != null
+                ? secondaryButton.getMetrics("SecondaryFooterButton")
+                : PersistableBundle.EMPTY;
+
+        PersistableBundle persistableBundle =
+            PersistableBundles.mergeBundles(
+                footerBarMixin.getLoggingMetrics(),
+                primaryButtonMetrics,
+                secondaryButtonMetrics,
+                bundle);
+
+        SetupMetricsLogger.logCustomEvent(
+            getContext(),
+            CustomEvent.create(MetricKey.get("FooterButtonMetrics", activity), persistableBundle));
+      } else {
+        LOG.w("FooterBarMixin is null");
+        SetupMetricsLogger.logCustomEvent(
+            getContext(),
+            CustomEvent.create(MetricKey.get("FooterButtonMetrics", activity), bundle));
       }
-
-      footerBarMixin.onDetachedFromWindow();
-      FooterButton primaryButton = footerBarMixin.getPrimaryButton();
-      FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
-      PersistableBundle primaryButtonMetrics =
-          primaryButton != null
-              ? primaryButton.getMetrics("PrimaryFooterButton")
-              : PersistableBundle.EMPTY;
-      PersistableBundle secondaryButtonMetrics =
-          secondaryButton != null
-              ? secondaryButton.getMetrics("SecondaryFooterButton")
-              : PersistableBundle.EMPTY;
-
-      PersistableBundle persistableBundle =
-          PersistableBundles.mergeBundles(
-              footerBarMixin.getLoggingMetrics(),
-              primaryButtonMetrics,
-              secondaryButtonMetrics,
-              bundle);
-
-      SetupMetricsLogger.logCustomEvent(
-          getContext(),
-          CustomEvent.create(MetricKey.get("FooterButtonMetrics", activity), persistableBundle));
     }
   }
 

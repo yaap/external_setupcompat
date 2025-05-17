@@ -1014,26 +1014,31 @@ public class FooterBarMixin implements Mixin {
     buttonContainer.post(
         () -> {
           int containerWidth = buttonContainer.getMeasuredWidth();
-          // Only allow primary button been shown on the screen if in the down button style.
-          if (getSecondaryButtonView() != null) {
-            getSecondaryButtonView().setVisibility(View.GONE);
-          }
           setDownButtonStyle(getPrimaryButtonView());
           if (!isTwoPaneLayout()) {
             buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
           } else {
             buttonContainer.setGravity(Gravity.CENTER_VERTICAL);
 
-            Button downButtonView = getPrimaryButtonView();
-            LayoutParams primaryLayoutParams = (LayoutParams) downButtonView.getLayoutParams();
             int downButtonWidth =
                 context
                     .getResources()
                     .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
-            // Put down button to the center of the one side in two pane mode.
-            primaryLayoutParams.setMarginStart(
-                (containerWidth / 2) + (containerWidth / 4) - downButtonWidth);
-            downButtonView.setLayoutParams(primaryLayoutParams);
+            Button downButton = getPrimaryButtonView();
+            LinearLayout.LayoutParams layoutParams =
+                (LinearLayout.LayoutParams) downButton.getLayoutParams();
+            // Set padding for the button container to center the down button in two pane mode, it
+            // is required to consider the button's margin. Sets button container's padding instead
+            // of button margin because using button LayoutParameter to set the margin will call the
+            // request layout unexpectedly then make the down button style incorrect.
+            double paddingStart =
+                ((containerWidth * 0.75) - (downButtonWidth / 2.0))
+                    - (layoutParams.getMarginStart() + layoutParams.getMarginEnd());
+            buttonContainer.setPadding(
+                (int) Math.round(paddingStart),
+                buttonContainer.getPaddingTop(),
+                buttonContainer.getPaddingEnd(),
+                buttonContainer.getPaddingBottom());
           }
         });
   }

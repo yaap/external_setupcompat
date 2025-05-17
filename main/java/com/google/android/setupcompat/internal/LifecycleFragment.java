@@ -26,6 +26,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 import com.google.android.setupcompat.logging.CustomEvent;
 import com.google.android.setupcompat.logging.MetricKey;
@@ -38,6 +39,7 @@ public class LifecycleFragment extends Fragment {
   private static final String LOG_TAG = LifecycleFragment.class.getSimpleName();
   private static final Logger LOG = new Logger(LOG_TAG);
   private static final String FRAGMENT_ID = "lifecycle_monitor";
+  @VisibleForTesting static final String KEY_ON_SCREEN_START = "onScreenStart";
 
   private MetricKey metricKey;
   private long startInNanos;
@@ -135,15 +137,25 @@ public class LifecycleFragment extends Fragment {
   }
 
   @Override
+  public void onStart() {
+    super.onStart();
+    startInNanos = ClockProvider.timeInNanos();
+    LOG.atDebug(
+        "onStart host="
+            + getActivity().getClass().getSimpleName()
+            + ", startInNanos="
+            + startInNanos);
+    logScreenTimestamp(KEY_ON_SCREEN_START);
+  }
+
+  @Override
   public void onResume() {
     super.onResume();
-    startInNanos = ClockProvider.timeInNanos();
     LOG.atDebug(
         "onResume host="
             + getActivity().getClass().getSimpleName()
             + ", startInNanos="
-            + startInNanos);
-    logScreenResume();
+            + ClockProvider.timeInNanos());
   }
 
   @Override
@@ -169,10 +181,11 @@ public class LifecycleFragment extends Fragment {
     }
   }
 
-  private void logScreenResume() {
+  @VisibleForTesting
+  void logScreenTimestamp(String keyName) {
     if (VERSION.SDK_INT >= VERSION_CODES.Q) {
       PersistableBundle bundle = new PersistableBundle();
-      bundle.putLong("onScreenResume", System.nanoTime());
+      bundle.putLong(keyName, System.nanoTime());
       SetupMetricsLogger.logCustomEvent(
           getActivity(),
           CustomEvent.create(MetricKey.get("ScreenActivity", getActivity()), bundle));
