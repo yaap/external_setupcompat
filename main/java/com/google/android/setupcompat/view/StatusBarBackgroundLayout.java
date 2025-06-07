@@ -105,9 +105,9 @@ public class StatusBarBackgroundLayout extends FrameLayout {
         LOG.atDebug("NavigationBarHeight: " + insets.getSystemWindowInsetBottom());
         insets =
             insets.replaceSystemWindowInsets(
-                insets.getSystemWindowInsetLeft(),
+                0,
                 insets.getSystemWindowInsetTop(),
-                insets.getSystemWindowInsetRight(),
+                0,
                 findViewById(R.id.suc_layout_status).getPaddingBottom());
       }
     }

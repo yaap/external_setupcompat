@@ -51,6 +51,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.ViewCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.setupcompat.PartnerCustomizationLayout;
 import com.google.android.setupcompat.R;
@@ -100,6 +101,8 @@ public class FooterBarMixin implements Mixin {
 
   private int footerBarPaddingTop;
   private int footerBarPaddingBottom;
+  private int windowInsetLeft = 0;
+  private int windowInsetRight = 0;
   @VisibleForTesting int footerBarPaddingStart;
   @VisibleForTesting int footerBarPaddingEnd;
   @VisibleForTesting int defaultPadding;
@@ -116,6 +119,7 @@ public class FooterBarMixin implements Mixin {
   private String hostFragmentName;
   private String hostFragmentTag;
   private int containerVisibility;
+  private boolean downButtonEnable;
 
   @VisibleForTesting final int footerBarButtonMiddleSpacing;
 
@@ -303,6 +307,12 @@ public class FooterBarMixin implements Mixin {
     }
   }
 
+  public void setDownButtonEnabled(boolean enable) {
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
+      downButtonEnable = enable;
+    }
+  }
+
   public void setFragmentInfo(@Nullable Fragment fragment) {
     if (fragment != null) {
       hostFragmentName = fragment.getClass().getSimpleName();
@@ -382,9 +392,9 @@ public class FooterBarMixin implements Mixin {
     buttonContainer.setId(View.generateViewId());
     updateFooterBarPadding(
         buttonContainer,
-        footerBarPaddingStart,
+        footerBarPaddingStart + windowInsetLeft,
         footerBarPaddingTop,
-        footerBarPaddingEnd,
+        footerBarPaddingEnd + windowInsetRight,
         footerBarPaddingBottom);
     if (isFooterButtonAlignedEnd()) {
       buttonContainer.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
@@ -444,9 +454,9 @@ public class FooterBarMixin implements Mixin {
     }
     updateFooterBarPadding(
         buttonContainer,
-        footerBarPaddingStart,
+        footerBarPaddingStart + windowInsetLeft,
         footerBarPaddingTop,
-        footerBarPaddingEnd,
+        footerBarPaddingEnd + windowInsetRight,
         footerBarPaddingBottom);
 
     if (PartnerConfigHelper.get(context)
@@ -827,6 +837,11 @@ public class FooterBarMixin implements Mixin {
         });
   }
 
+  /** Returns the {@link FooterButton} of tertiary button. */
+  public FooterButton getTertiaryButton() {
+    return tertiaryButton;
+  }
+
   @Nullable
   public Button getTertiaryButtonView() {
     if (!PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
@@ -834,6 +849,12 @@ public class FooterBarMixin implements Mixin {
       return null;
     }
     return buttonContainer == null ? null : buttonContainer.findViewById(tertiaryButtonId);
+  }
+
+  @VisibleForTesting
+  boolean isTertiaryButtonVisible() {
+    return getTertiaryButtonView() != null
+        && getTertiaryButtonView().getVisibility() == View.VISIBLE;
   }
 
   /**
@@ -940,7 +961,8 @@ public class FooterBarMixin implements Mixin {
   public void setButtonWidthForExpressiveStyle() {
     buttonContainer.post(
         () -> {
-          int containerWidth = buttonContainer.getMeasuredWidth();
+          int containerWidth =
+              buttonContainer.getMeasuredWidth() - windowInsetLeft - windowInsetRight;
           Button primaryButton = getPrimaryButtonView();
           Button secondaryButton = getSecondaryButtonView();
           Button tertiaryButton = getTertiaryButtonView();
@@ -1011,9 +1033,11 @@ public class FooterBarMixin implements Mixin {
 
   /** Sets down button for expressive style. */
   public void setDownButtonForExpressiveStyle() {
+    downButtonEnable = true;
     buttonContainer.post(
         () -> {
-          int containerWidth = buttonContainer.getMeasuredWidth();
+          int containerWidth =
+              buttonContainer.getMeasuredWidth() - windowInsetLeft - windowInsetRight;
           setDownButtonStyle(getPrimaryButtonView());
           if (!isTwoPaneLayout()) {
             buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
@@ -1034,8 +1058,9 @@ public class FooterBarMixin implements Mixin {
             double paddingStart =
                 ((containerWidth * 0.75) - (downButtonWidth / 2.0))
                     - (layoutParams.getMarginStart() + layoutParams.getMarginEnd());
-            buttonContainer.setPadding(
-                (int) Math.round(paddingStart),
+
+            buttonContainer.setPaddingRelative(
+                (int) (Math.round(paddingStart) + windowInsetLeft),
                 buttonContainer.getPaddingTop(),
                 buttonContainer.getPaddingEnd(),
                 buttonContainer.getPaddingBottom());
@@ -1459,7 +1484,7 @@ public class FooterBarMixin implements Mixin {
       // Ignore action since buttonContainer is null
       return;
     }
-    buttonContainer.setPadding(left, top, right, bottom);
+    buttonContainer.setPaddingRelative(left, top, right, bottom);
 
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
       // Adjust footer bar padding to account for the navigation bar, ensuring it extends to the
@@ -1490,11 +1515,14 @@ public class FooterBarMixin implements Mixin {
         /* isVisible= */ isPrimaryButtonVisible(), /* isUsingXml= */ false);
     metrics.logSecondaryButtonInitialStateVisibility(
         /* isVisible= */ isSecondaryButtonVisible(), /* isUsingXml= */ false);
+    metrics.logTertiaryButtonInitialStateVisibility(
+        /* isVisible= */ isTertiaryButtonVisible(), /* isUsingXml= */ false);
   }
 
   /** Uses for notify mixin the view already detached from window. */
   public void onDetachedFromWindow() {
-    metrics.updateButtonVisibility(isPrimaryButtonVisible(), isSecondaryButtonVisible());
+    metrics.updateButtonVisibility(
+        isPrimaryButtonVisible(), isSecondaryButtonVisible(), isTertiaryButtonVisible());
   }
 
   /**
@@ -1517,6 +1545,30 @@ public class FooterBarMixin implements Mixin {
       }
     }
     return persistableBundle;
+  }
+
+  public void setWindowInsets(int left, int right) {
+    if (buttonContainer != null
+        && ViewCompat.getLayoutDirection(buttonContainer) == ViewCompat.LAYOUT_DIRECTION_RTL) {
+      int temp = left;
+      left = right;
+      right = temp;
+    }
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(context)
+        && (windowInsetLeft != left || windowInsetRight != right)) {
+      windowInsetLeft = left;
+      windowInsetRight = right;
+      if (downButtonEnable) {
+        setDownButtonForExpressiveStyle();
+      } else {
+        updateFooterBarPadding(
+            buttonContainer,
+            windowInsetLeft + footerBarPaddingStart,
+            footerBarPaddingTop,
+            windowInsetRight + footerBarPaddingEnd,
+            footerBarPaddingBottom);
+      }
+    }
   }
 
   private void updateTextColorForButton(Button button, boolean enable, int color) {

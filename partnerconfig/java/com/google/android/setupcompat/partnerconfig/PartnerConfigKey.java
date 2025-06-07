@@ -96,6 +96,8 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_ACCOUNT_NAME_FONT_FAMILY,
   PartnerConfigKey.KEY_ACCOUNT_AVATAR_MARGIN_END,
   PartnerConfigKey.KEY_ACCOUNT_AVATAR_MAX_SIZE,
+  PartnerConfigKey.KEY_ACCOUNT_CONTAINER_MARGIN_TOP,
+  PartnerConfigKey.KEY_ACCOUNT_CONTAINER_MARGIN_BOTTOM,
   PartnerConfigKey.KEY_CONTENT_TEXT_SIZE,
   PartnerConfigKey.KEY_CONTENT_TEXT_COLOR,
   PartnerConfigKey.KEY_CONTENT_LINK_TEXT_COLOR,
@@ -380,6 +382,12 @@ public @interface PartnerConfigKey {
 
   // Size of the account avatar
   String KEY_ACCOUNT_AVATAR_MAX_SIZE = "setup_design_account_avatar_size";
+
+  // Margin top of the account container
+  String KEY_ACCOUNT_CONTAINER_MARGIN_TOP = "setup_design_account_container_margin_top";
+
+  // Margin bottom of the account container
+  String KEY_ACCOUNT_CONTAINER_MARGIN_BOTTOM = "setup_design_account_container_margin_bottom";
 
   // Text size of the body content text
   String KEY_CONTENT_TEXT_SIZE = "setup_design_content_text_size";

@@ -295,6 +295,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
         footerBarMixin.onDetachedFromWindow();
         FooterButton primaryButton = footerBarMixin.getPrimaryButton();
         FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
+        FooterButton tertiaryButton = footerBarMixin.getTertiaryButton();
         PersistableBundle primaryButtonMetrics =
             primaryButton != null
                 ? primaryButton.getMetrics("PrimaryFooterButton")
@@ -302,6 +303,10 @@ public class PartnerCustomizationLayout extends TemplateLayout {
         PersistableBundle secondaryButtonMetrics =
             secondaryButton != null
                 ? secondaryButton.getMetrics("SecondaryFooterButton")
+                : PersistableBundle.EMPTY;
+        PersistableBundle tertiaryButtonMetrics =
+            tertiaryButton != null
+                ? tertiaryButton.getMetrics("TertiaryFooterButton")
                 : PersistableBundle.EMPTY;
 
         PersistableBundle layoutTypeMetrics =
@@ -315,6 +320,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
                 footerBarMixin.getLoggingMetrics(),
                 primaryButtonMetrics,
                 secondaryButtonMetrics,
+                tertiaryButtonMetrics,
                 layoutTypeMetrics,
                 onDetachedFromWindowMetrics);
 
@@ -348,6 +354,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
         footerBarMixin.onDetachedFromWindow();
         FooterButton primaryButton = footerBarMixin.getPrimaryButton();
         FooterButton secondaryButton = footerBarMixin.getSecondaryButton();
+        FooterButton tertiaryButton = footerBarMixin.getTertiaryButton();
         PersistableBundle primaryButtonMetrics =
             primaryButton != null
                 ? primaryButton.getMetrics("PrimaryFooterButton")
@@ -356,12 +363,17 @@ public class PartnerCustomizationLayout extends TemplateLayout {
             secondaryButton != null
                 ? secondaryButton.getMetrics("SecondaryFooterButton")
                 : PersistableBundle.EMPTY;
+        PersistableBundle tertiaryButtonMetrics =
+            tertiaryButton != null
+                ? tertiaryButton.getMetrics("TertiaryFooterButton")
+                : PersistableBundle.EMPTY;
 
         PersistableBundle persistableBundle =
             PersistableBundles.mergeBundles(
                 footerBarMixin.getLoggingMetrics(),
                 primaryButtonMetrics,
                 secondaryButtonMetrics,
+                tertiaryButtonMetrics,
                 bundle);
 
         SetupMetricsLogger.logCustomEvent(
