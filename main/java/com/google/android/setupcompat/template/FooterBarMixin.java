@@ -1212,23 +1212,22 @@ public class FooterBarMixin implements Mixin {
   /**
    * Sets the layout parameters for the primary button.
    *
-   * <p>Primary button is only used in both stacked and non-stacked button mode.
+   * <p>Primary button is only used in both stacked and unstacked button mode.
    *
    * @param primaryButton The primary button.
    * @param availableFooterBarWidth The available width for the footer bar.
-   * @param middleSpacing The middle spacing between the button and the footer bar. It should be
-   *     non-zero for expressive style, and zero for pre expressive style.
-   * @param marginStart The margin start for the button, it's used for pre expressive style, set
-   *     empty from expressive style.
+   * @param stackedMiddleSpacing The middle spacing between buttons when the buttons are stacked.
+   * @param marginStart The margin start of the primary button. It can be used to set the middle
+   *     spacing between the buttons when the buttons are unstacked.
    */
   private void setPrimaryButtonLayoutParams(
       Button primaryButton,
       int availableFooterBarWidth,
-      int middleSpacing,
+      int stackedMiddleSpacing,
       Optional<Integer> marginStart) {
     LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
     primaryLayoutParams.width = availableFooterBarWidth;
-    primaryLayoutParams.bottomMargin = middleSpacing;
+    primaryLayoutParams.bottomMargin = stackedMiddleSpacing;
     marginStart.ifPresent(primaryLayoutParams::setMarginStart);
     primaryButton.setLayoutParams(primaryLayoutParams);
   }
@@ -1236,23 +1235,22 @@ public class FooterBarMixin implements Mixin {
   /**
    * Sets the layout parameters for the secondary button.
    *
-   * <p>Secondary button is only used in both stacked and non-stacked button mode.
+   * <p>Secondary button is only used in both stacked and unstacked button mode.
    *
    * @param secondaryButton The secondary button.
    * @param availableFooterBarWidth The available width for the footer bar.
-   * @param middleSpacing The middle spacing between the button and the footer bar. It should be
-   *     non-zero for expressive style, and zero for pre expressive style.
-   * @param marginEnd The margin end for the button, it's used for pre expressive style, set empty
-   *     from expressive style.
+   * @param stackedMiddleSpacing The middle spacing between buttons when the buttons are stacked.
+   * @param marginEnd The margin end of the secondary button. It can be used to set the middle
+   *     spacing between the buttons when the buttons are unstacked.
    */
   private void setSecondaryButtonLayoutParams(
       Button secondaryButton,
       int availableFooterBarWidth,
-      int middleSpacing,
+      int stackedMiddleSpacing,
       Optional<Integer> marginEnd) {
     LayoutParams secondaryLayoutParams = (LayoutParams) secondaryButton.getLayoutParams();
     secondaryLayoutParams.width = availableFooterBarWidth;
-    secondaryLayoutParams.topMargin = middleSpacing;
+    secondaryLayoutParams.topMargin = stackedMiddleSpacing;
     marginEnd.ifPresent(secondaryLayoutParams::setMarginEnd);
     secondaryButton.setLayoutParams(secondaryLayoutParams);
   }
@@ -1264,15 +1262,14 @@ public class FooterBarMixin implements Mixin {
    *
    * @param tertiaryButton The tertiary button.
    * @param availableFooterBarWidth The available width for the footer bar.
-   * @param middleSpacing The middle spacing between the button and the footer bar. It starts using
-   *     from expressive style, set 0 in pre expressive style.
+   * @param stackedMiddleSpacing The middle spacing between buttons when the buttons are stacked.
    */
   private void setTertiaryButtonLayoutParams(
-      Button tertiaryButton, int availableFooterBarWidth, int middleSpacing) {
+      Button tertiaryButton, int availableFooterBarWidth, int stackedMiddleSpacing) {
     LayoutParams tertiaryLayoutParams = (LayoutParams) tertiaryButton.getLayoutParams();
     tertiaryLayoutParams.width = availableFooterBarWidth;
-    tertiaryLayoutParams.topMargin = middleSpacing;
-    tertiaryLayoutParams.bottomMargin = middleSpacing;
+    tertiaryLayoutParams.topMargin = stackedMiddleSpacing;
+    tertiaryLayoutParams.bottomMargin = stackedMiddleSpacing;
     tertiaryButton.setLayoutParams(tertiaryLayoutParams);
   }
 
@@ -1579,12 +1576,12 @@ public class FooterBarMixin implements Mixin {
   }
 
   private void updateFooterBarPadding(
-      LinearLayout buttonContainer, int left, int top, int right, int bottom) {
+      LinearLayout buttonContainer, int start, int top, int end, int bottom) {
     if (buttonContainer == null) {
       // Ignore action since buttonContainer is null
       return;
     }
-    buttonContainer.setPaddingRelative(left, top, right, bottom);
+    buttonContainer.setPaddingRelative(start, top, end, bottom);
 
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
       // Adjust footer bar padding to account for the navigation bar, ensuring it extends to the
