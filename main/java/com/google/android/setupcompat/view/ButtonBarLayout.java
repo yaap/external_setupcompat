@@ -149,13 +149,22 @@ public class ButtonBarLayout extends LinearLayout {
       // balanced to compensate for different alignment for borderless (left) button and
       // the raised (right) button. When it's stacked, we want the buttons to be centered,
       // so we balance out the paddings here.
-      originalPaddingLeft = getPaddingLeft();
-      originalPaddingRight = getPaddingRight();
+      saveCurrentPaddingAsOriginal();
       int paddingHorizontal = Math.max(originalPaddingLeft, originalPaddingRight);
       setPadding(paddingHorizontal, getPaddingTop(), paddingHorizontal, getPaddingBottom());
     } else {
+      // When unstacking, restore the original padding. It also been used for save the original
+      // padding when stacked button become unstacked to avoid the padding been reset.
+      if (PartnerConfigHelper.isGlifExpressiveEnabled(getContext())) {
+        saveCurrentPaddingAsOriginal();
+      }
       setPadding(originalPaddingLeft, getPaddingTop(), originalPaddingRight, getPaddingBottom());
     }
+  }
+
+  private void saveCurrentPaddingAsOriginal() {
+    originalPaddingLeft = getPaddingLeft();
+    originalPaddingRight = getPaddingRight();
   }
 
   private boolean isPrimaryButtonStyle(View child) {

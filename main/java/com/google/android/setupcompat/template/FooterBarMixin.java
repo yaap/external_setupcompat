@@ -115,6 +115,7 @@ public class FooterBarMixin implements Mixin {
   private final int footerBarSecondaryButtonEnabledTextColor;
   private final int footerBarPrimaryButtonDisabledTextColor;
   private final int footerBarSecondaryButtonDisabledTextColor;
+  private final int landMiddleHorizontalSpacing;
   private static final String KEY_HOST_FRAGMENT_NAME = "HostFragmentName";
   private static final String KEY_HOST_FRAGMENT_TAG = "HostFragmentTag";
   private String hostFragmentName;
@@ -296,6 +297,9 @@ public class FooterBarMixin implements Mixin {
     footerBarButtonStackMiddleSpacing =
         a.getDimensionPixelSize(
             R.styleable.SucFooterBarMixin_sucFooterBarButtonStackMiddleSpacing, 0);
+    landMiddleHorizontalSpacing =
+        a.getDimensionPixelSize(
+            R.styleable.SucFooterBarMixin_sucFooterBarLandMiddleHorizontalSpacing, 0);
 
     int primaryBtn =
         a.getResourceId(R.styleable.SucFooterBarMixin_sucFooterBarPrimaryFooterButton, 0);
@@ -993,7 +997,8 @@ public class FooterBarMixin implements Mixin {
               containerWidth
                   - footerBarPaddingStart
                   - footerBarPaddingEnd
-                  - footerBarButtonMiddleSpacing;
+                  - footerBarButtonMiddleSpacing
+                  - getLandMiddleHorizontalSpacing();
           int maxButtonWidth = availableFooterBarWidth / 2;
 
           if (isThreeButtons(primaryButton, secondaryButton, tertiaryButton)) {
@@ -1043,6 +1048,37 @@ public class FooterBarMixin implements Mixin {
           // Set back the button container visibility to its original state.
           buttonContainer.setVisibility(containerVisibility);
         });
+  }
+
+  /**
+   * Returns the middle horizontal spacing in landscape mode.
+   *
+   * <p>While the initial calculation works for the default Pixel configuration (where configured
+   * spacing equals the dimension), it fails with custom OEM settings. This function is necessary to
+   * identify the discrepancy between the configured value and the actual dimension, and then apply
+   * an adjustment to ensure the final result is accurate regardless of customization.
+   */
+  private int getLandMiddleHorizontalSpacing() {
+    boolean landMiddleHorizontalSpacingAvailable =
+        PartnerConfigHelper.get(context)
+            .isPartnerConfigAvailable(PartnerConfig.CONFIG_LAND_MIDDLE_HORIZONTAL_SPACING);
+    int configuredLandHorizontalSpacing =
+        (int)
+            PartnerConfigHelper.get(context)
+                .getDimension(context, PartnerConfig.CONFIG_LAND_MIDDLE_HORIZONTAL_SPACING);
+    boolean validLandMiddleHorizontalSpacing =
+        isTwoPaneLayout() && landMiddleHorizontalSpacingAvailable;
+    LOG.atInfo(
+        String.format(
+            Locale.US,
+            "validLandMiddleHorizontalSpacing: %s, configuredLandHorizontalSpacing: %d,"
+                + " landMiddleHorizontalSpacing: %d",
+            validLandMiddleHorizontalSpacing,
+            configuredLandHorizontalSpacing,
+            landMiddleHorizontalSpacing));
+    return validLandMiddleHorizontalSpacing
+        ? (configuredLandHorizontalSpacing - landMiddleHorizontalSpacing) / 2
+        : 0;
   }
 
   private void updateMiddleSpacing() {

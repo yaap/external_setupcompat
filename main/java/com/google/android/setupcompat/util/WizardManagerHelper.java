@@ -16,7 +16,6 @@
 
 package com.google.android.setupcompat.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -31,6 +30,7 @@ import java.util.Arrays;
  * and invoking Wizard Manager to start the next action.
  */
 public final class WizardManagerHelper {
+
 
   /** Enum for notifying an Activity that what SetupWizard flow is */
   public enum SuwLifeCycleEnum {
@@ -95,6 +95,7 @@ public final class WizardManagerHelper {
 
   public static final String SETTINGS_GLOBAL_DEVICE_PROVISIONED = "device_provisioned";
   public static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
+
 
   /**
    * Gets an intent that will invoke the next step of setup wizard.
