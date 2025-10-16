@@ -30,6 +30,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_LIGHT_NAVIGATION_BAR,
   PartnerConfigKey.KEY_NAVIGATION_BAR_DIVIDER_COLOR,
   PartnerConfigKey.KEY_FOOTER_BAR_BG_COLOR,
+  PartnerConfigKey.SETUP_COMPAT_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR,
   PartnerConfigKey.KEY_FOOTER_BAR_MIN_HEIGHT,
   PartnerConfigKey.KEY_FOOTER_BAR_PADDING_START,
   PartnerConfigKey.KEY_FOOTER_BAR_PADDING_END,
@@ -184,6 +185,10 @@ public @interface PartnerConfigKey {
 
   // Background color of the footer bar.
   String KEY_FOOTER_BAR_BG_COLOR = "setup_compat_footer_bar_bg_color";
+
+  // Background color of the footer bar when there is more content to scroll.
+  String SETUP_COMPAT_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR =
+      "setup_compat_footer_bar_more_to_scroll_bg_color";
 
   // The min height of the footer bar
   String KEY_FOOTER_BAR_MIN_HEIGHT = "setup_compat_footer_bar_min_height";

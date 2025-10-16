@@ -37,6 +37,10 @@ public enum PartnerConfig {
   // Background color of the footer bar.
   CONFIG_FOOTER_BAR_BG_COLOR(PartnerConfigKey.KEY_FOOTER_BAR_BG_COLOR, ResourceType.COLOR),
 
+  // Background color of the footer bar when there is more content to scroll.
+  CONFIG_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR(
+      PartnerConfigKey.SETUP_COMPAT_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR, ResourceType.COLOR),
+
   // The min height of the footer buttons
   CONFIG_FOOTER_BAR_MIN_HEIGHT(PartnerConfigKey.KEY_FOOTER_BAR_MIN_HEIGHT, ResourceType.DIMENSION),
 
