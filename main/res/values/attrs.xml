@@ -109,6 +109,7 @@
         <attr name="sucFooterBarButtonTextSize" format="dimension" />
         <attr name="sucFooterButtonTextLineSpacingExtra" format="dimension" />
         <attr name="sucFooterBarButtonOutlinedColor" format="color" />
+        <attr name="sucFooterBarLandMiddleHorizontalSpacing" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="SucHeaderMixin">

@@ -83,6 +83,37 @@ filegroup {
 }
 
 android_library {
+    name: "setupcompat_wizard_manager_constants",
+    manifest: "AndroidManifest.xml",
+    srcs: [
+        "main/java/com/google/android/setupcompat/util/SuwLifeCycleEnum.kt",
+        "main/java/com/google/android/setupcompat/util/WizardManagerConstants.kt",
+    ],
+    min_sdk_version: "23",
+    sdk_version: "current",
+}
+
+android_library {
+    name: "setupcompat_compat_wizard_manager",
+    manifest: "AndroidManifest.xml",
+    srcs: [
+        "main/java/com/google/android/setupcompat/util/WizardManagerCompatHelper.kt",
+    ],
+    min_sdk_version: "23",
+    sdk_version: "system_current",
+    static_libs: [
+        "setupcompat",
+        "android_onboarding.contracts.setupwizard.orchestrator",
+        "android_onboarding.utils.persistable",
+        "android_onboarding.versions",
+        "android_onboarding.versions.changes",
+        "android_onboarding.wizardmanager.actions",
+        "wizard_manager.WizardManagerExtras",
+        "androidx.annotation_annotation",
+    ],
+}
+
+android_library {
     name: "setupcompat",
     manifest: "AndroidManifest.xml",
     resource_dirs: [
@@ -101,7 +132,7 @@ android_library {
         "error_prone_annotations",
         "PartnerConfig",
     ],
-    min_sdk_version: "21",
+    min_sdk_version: "23",
     sdk_version: "current",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
@@ -134,7 +165,7 @@ android_library {
         "error_prone_annotations",
         "PartnerConfig",
     ],
-    min_sdk_version: "21",
+    min_sdk_version: "23",
     sdk_version: "current",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
@@ -162,7 +193,7 @@ android_library {
         "com.google.android.material_material",
         "error_prone_annotations",
     ],
-    min_sdk_version: "21",
+    min_sdk_version: "23",
     sdk_version: "current",
     optimize: {
         proguard_flags_files: ["proguard.flags"],

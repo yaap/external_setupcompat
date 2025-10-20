@@ -85,6 +85,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_LAYOUT_GRAVITY,
   PartnerConfigKey.KEY_ICON_MARGIN_TOP,
   PartnerConfigKey.KEY_ICON_SIZE,
+  PartnerConfigKey.KEY_ICON_COLOR,
   PartnerConfigKey.KEY_ILLUSTRATION_MAX_WIDTH,
   PartnerConfigKey.KEY_ILLUSTRATION_MAX_HEIGHT,
   PartnerConfigKey.KEY_DESCRIPTION_TEXT_SIZE,
@@ -327,6 +328,9 @@ public @interface PartnerConfigKey {
 
   // Size of the icon
   String KEY_ICON_SIZE = "setup_design_icon_size";
+
+  // Color of the icon
+  String KEY_ICON_COLOR = "setup_design_icon_color";
 
   // The max width for illustration
   String KEY_ILLUSTRATION_MAX_WIDTH = "setup_design_illustration_max_width";

@@ -218,6 +218,9 @@ public enum PartnerConfig {
   // Size of the icon
   CONFIG_ICON_SIZE(PartnerConfigKey.KEY_ICON_SIZE, ResourceType.DIMENSION),
 
+  // Color of the icon
+  CONFIG_ICON_COLOR(PartnerConfigKey.KEY_ICON_COLOR, ResourceType.COLOR),
+
   // The max width of the illustration
   CONFIG_ILLUSTRATION_MAX_WIDTH(
       PartnerConfigKey.KEY_ILLUSTRATION_MAX_WIDTH, ResourceType.DIMENSION),
