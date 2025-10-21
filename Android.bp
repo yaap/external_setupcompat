@@ -137,13 +137,13 @@ android_library {
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
     apex_available: [
         "//apex_available:platform",
         "com.android.healthfitness",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 android_library {
