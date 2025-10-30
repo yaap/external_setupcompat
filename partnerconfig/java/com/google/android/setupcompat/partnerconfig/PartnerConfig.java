@@ -553,7 +553,10 @@ public enum PartnerConfig {
 
   // The selected radius of the card view.
   CONFIG_CARD_VIEW_SELECTED_RADIUS(
-      PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS, ResourceType.DIMENSION);
+      PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS, ResourceType.DIMENSION),
+
+  // The background color of list items.
+  CONFIG_ITEMS_BACKGROUND_COLOR(PartnerConfigKey.KEY_ITEMS_BACKGROUND_COLOR, ResourceType.COLOR);
 
   /** Resource type of the partner resources type. */
   public enum ResourceType {
