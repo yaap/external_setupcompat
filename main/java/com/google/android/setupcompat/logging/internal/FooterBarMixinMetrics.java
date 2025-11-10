@@ -21,14 +21,31 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.TargetApi;
 import android.os.Build.VERSION_CODES;
 import android.os.PersistableBundle;
+import android.text.TextUtils;
+import androidx.annotation.IntDef;
 import androidx.annotation.StringDef;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.setupcompat.util.Logger;
 import java.lang.annotation.Retention;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Uses to log internal event footer button metric */
 public class FooterBarMixinMetrics {
   private static final Logger LOG = new Logger("FooterBarMixinMetrics");
+
+  /** The button type of footer button */
+  @Retention(SOURCE)
+  @IntDef({
+    BUTTON_TYPE_PRIMARY,
+    BUTTON_TYPE_SECONDARY,
+    BUTTON_TYPE_TERTIARY,
+  })
+  public @interface FooterButtonType {}
+
+  public static final int BUTTON_TYPE_PRIMARY = 1;
+  public static final int BUTTON_TYPE_SECONDARY = 2;
+  public static final int BUTTON_TYPE_TERTIARY = 3;
 
   @VisibleForTesting
   public static final String EXTRA_PRIMARY_BUTTON_VISIBILITY = "PrimaryButtonVisibility";
@@ -38,6 +55,8 @@ public class FooterBarMixinMetrics {
 
   @VisibleForTesting
   public static final String EXTRA_TERTIARY_BUTTON_VISIBILITY = "TertiaryButtonVisibility";
+
+  @VisibleForTesting public static final String EXTRA_BUTTON_CLICK_ORDER = "ButtonClickOrder";
 
   @Retention(SOURCE)
   @StringDef({
@@ -68,8 +87,15 @@ public class FooterBarMixinMetrics {
   @VisibleForTesting @FooterButtonVisibility
   public String tertiaryButtonVisibility = FooterButtonVisibility.UNKNOWN;
 
+  @VisibleForTesting public List<String> buttonClickOrder = new ArrayList<>();
+
   /** Creates a metric object for metric logging */
   public FooterBarMixinMetrics() {}
+
+  /** Record button click events in order. */
+  public void addButtonClicked(@FooterButtonType int buttonType) {
+    buttonClickOrder.add(String.valueOf(buttonType));
+  }
 
   /** Gets initial state visibility */
   @FooterButtonVisibility
@@ -151,6 +177,7 @@ public class FooterBarMixinMetrics {
     persistableBundle.putString(EXTRA_PRIMARY_BUTTON_VISIBILITY, primaryButtonVisibility);
     persistableBundle.putString(EXTRA_SECONDARY_BUTTON_VISIBILITY, secondaryButtonVisibility);
     persistableBundle.putString(EXTRA_TERTIARY_BUTTON_VISIBILITY, tertiaryButtonVisibility);
+    persistableBundle.putString(EXTRA_BUTTON_CLICK_ORDER, TextUtils.join(",", buttonClickOrder));
     return persistableBundle;
   }
 }

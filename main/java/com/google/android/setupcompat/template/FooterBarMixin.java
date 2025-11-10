@@ -1517,7 +1517,11 @@ public class FooterBarMixin implements Mixin {
 
     // apply initial configuration into button view.
     button.setText(footerButton.getText());
-    button.setOnClickListener(footerButton);
+    button.setOnClickListener(
+        v -> {
+          logButtonClickMetrics(v);
+          footerButton.onClick(v);
+        });
     button.setVisibility(footerButton.getVisibility());
     button.setEnabled(footerButton.isEnabled());
     if (buttonImpl instanceof MaterialFooterActionButton) {
@@ -1529,6 +1533,16 @@ public class FooterBarMixin implements Mixin {
     }
     footerButton.setOnButtonEventListener(createButtonEventListener(button.getId()));
     return buttonImpl;
+  }
+
+  private void logButtonClickMetrics(View v) {
+    if (v.getId() == primaryButtonId) {
+      metrics.addButtonClicked(FooterBarMixinMetrics.BUTTON_TYPE_PRIMARY);
+    } else if (v.getId() == secondaryButtonId) {
+      metrics.addButtonClicked(FooterBarMixinMetrics.BUTTON_TYPE_SECONDARY);
+    } else if (v.getId() == tertiaryButtonId) {
+      metrics.addButtonClicked(FooterBarMixinMetrics.BUTTON_TYPE_TERTIARY);
+    }
   }
 
   // TODO: Make sure customize attributes in theme can be applied during setup flow.

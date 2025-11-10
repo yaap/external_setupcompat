@@ -129,6 +129,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_ITEMS_MIN_HEIGHT,
   PartnerConfigKey.KEY_ITEMS_DIVIDER_SHOWN,
   PartnerConfigKey.KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS,
+  PartnerConfigKey.KEY_ITEMS_BACKGROUND_COLOR,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_DEFAULT,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_ACCOUNT,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_CONNECTION,
@@ -483,6 +484,9 @@ public @interface PartnerConfigKey {
   // Font weight of the header
   String KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS =
       "setup_design_items_title_font_variation_settings";
+
+  // The background color of list items.
+  String KEY_ITEMS_BACKGROUND_COLOR = "setup_design_items_background_color";
 
   // The intrinsic width of the card view for foldable/tablet.
   String KEY_CARD_VIEW_INTRINSIC_WIDTH = "setup_design_card_view_intrinsic_width";
