@@ -41,6 +41,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.window.embedding.ActivityEmbeddingController;
 import com.google.android.setupcompat.partnerconfig.PartnerConfig.ResourceType;
 import com.google.android.setupcompat.util.BuildCompatUtils;
+import com.google.android.setupcompat.util.WizardManagerHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -144,6 +145,8 @@ public class PartnerConfigHelper {
   private static int savedConfigUiMode;
 
   private static boolean savedConfigEmbeddedActivityMode;
+
+  @VisibleForTesting static boolean isAnySetupWizard = true;
 
   @VisibleForTesting static Bundle applyTransitionBundle = null;
 
@@ -1249,8 +1252,29 @@ public class PartnerConfigHelper {
    * Returns true if the SetupWizard supports Glif Expressive style inside or outside setup flow.
    */
   public static boolean isGlifExpressiveEnabled(@NonNull Context context) {
+    boolean isRequery = false;
+    Activity activity = null;
+    try {
+      activity = lookupActivityFromContext(context);
+    } catch (IllegalArgumentException ex) {
+      Log.w(TAG, "Failed to lookup activity from context: " + ex);
+    }
+    // Save inside/outside setup wizard flag into bundle
+    Bundle extras = null;
+    if (activity != null) {
+      extras = new Bundle();
+      boolean currentIsAnySetupWizard = WizardManagerHelper.isAnySetupWizard(activity.getIntent());
+      // if the setup state is not cached or the setup staty is different from the current state, we
+      // need to requery the flag from the provider.
+      if (isAnySetupWizard != currentIsAnySetupWizard) {
+        isAnySetupWizard = currentIsAnySetupWizard;
+        isRequery = true;
+        Log.i(TAG, "Need to requery the flag isGlifExpressiveEnabled from provider");
+      }
+      extras.putBoolean(WizardManagerHelper.EXTRA_IS_SETUP_FLOW, currentIsAnySetupWizard);
+    }
 
-    if (applyGlifExpressiveBundle == null || applyGlifExpressiveBundle.isEmpty()) {
+    if (applyGlifExpressiveBundle == null || applyGlifExpressiveBundle.isEmpty() || isRequery) {
       try {
         applyGlifExpressiveBundle =
             context
@@ -1259,11 +1283,12 @@ public class PartnerConfigHelper {
                     getContentUri(),
                     IS_GLIF_EXPRESSIVE_ENABLED,
                     /* arg= */ null,
-                    /* extras= */ null);
+                    /* extras= */ extras);
       } catch (IllegalArgumentException | SecurityException exception) {
         Log.w(TAG, "isGlifExpressiveEnabled status is unknown; return as false.");
       }
     }
+
     if (applyGlifExpressiveBundle != null && !applyGlifExpressiveBundle.isEmpty()) {
       return applyGlifExpressiveBundle.getBoolean(IS_GLIF_EXPRESSIVE_ENABLED, false);
     }

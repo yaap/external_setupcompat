@@ -36,6 +36,9 @@ public class FooterBarMixinMetrics {
   @VisibleForTesting
   public static final String EXTRA_SECONDARY_BUTTON_VISIBILITY = "SecondaryButtonVisibility";
 
+  @VisibleForTesting
+  public static final String EXTRA_TERTIARY_BUTTON_VISIBILITY = "TertiaryButtonVisibility";
+
   @Retention(SOURCE)
   @StringDef({
     FooterButtonVisibility.UNKNOWN,
@@ -61,6 +64,9 @@ public class FooterBarMixinMetrics {
   public String primaryButtonVisibility = FooterButtonVisibility.UNKNOWN;
 
   @FooterButtonVisibility String secondaryButtonVisibility = FooterButtonVisibility.UNKNOWN;
+
+  @VisibleForTesting @FooterButtonVisibility
+  public String tertiaryButtonVisibility = FooterButtonVisibility.UNKNOWN;
 
   /** Creates a metric object for metric logging */
   public FooterBarMixinMetrics() {}
@@ -96,13 +102,25 @@ public class FooterBarMixinMetrics {
             : secondaryButtonVisibility;
   }
 
+  /** Saves tertiary footer button visibility when initial state */
+  public void logTertiaryButtonInitialStateVisibility(boolean isVisible, boolean isUsingXml) {
+    tertiaryButtonVisibility =
+        tertiaryButtonVisibility.equals(FooterButtonVisibility.UNKNOWN)
+            ? getInitialStateVisibility(isVisible, isUsingXml)
+            : tertiaryButtonVisibility;
+  }
+
   /** Saves footer button visibility when finish state */
   public void updateButtonVisibility(
-      boolean isPrimaryButtonVisible, boolean isSecondaryButtonVisible) {
+      boolean isPrimaryButtonVisible,
+      boolean isSecondaryButtonVisible,
+      boolean isTertiaryButtonVisible) {
     primaryButtonVisibility =
         updateButtonVisibilityState(primaryButtonVisibility, isPrimaryButtonVisible);
     secondaryButtonVisibility =
         updateButtonVisibilityState(secondaryButtonVisibility, isSecondaryButtonVisible);
+    tertiaryButtonVisibility =
+        updateButtonVisibilityState(tertiaryButtonVisibility, isTertiaryButtonVisible);
   }
 
   @FooterButtonVisibility
@@ -132,6 +150,7 @@ public class FooterBarMixinMetrics {
     PersistableBundle persistableBundle = new PersistableBundle();
     persistableBundle.putString(EXTRA_PRIMARY_BUTTON_VISIBILITY, primaryButtonVisibility);
     persistableBundle.putString(EXTRA_SECONDARY_BUTTON_VISIBILITY, secondaryButtonVisibility);
+    persistableBundle.putString(EXTRA_TERTIARY_BUTTON_VISIBILITY, tertiaryButtonVisibility);
     return persistableBundle;
   }
 }

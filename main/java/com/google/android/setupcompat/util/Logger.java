@@ -80,4 +80,8 @@ public final class Logger {
   public void e(String message, Throwable throwable) {
     Log.e(TAG, prefix.concat(message), throwable);
   }
+
+  public void wtf(String message) {
+    Log.wtf(TAG, prefix.concat(message));
+  }
 }

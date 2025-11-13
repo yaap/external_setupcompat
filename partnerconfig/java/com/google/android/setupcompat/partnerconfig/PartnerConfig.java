@@ -289,6 +289,14 @@ public enum PartnerConfig {
   // Size of account avatar
   CONFIG_ACCOUNT_AVATAR_SIZE(PartnerConfigKey.KEY_ACCOUNT_AVATAR_MAX_SIZE, ResourceType.DIMENSION),
 
+  // Margin top of the account container
+  CONFIG_ACCOUNT_CONTAINER_MARGIN_TOP(
+      PartnerConfigKey.KEY_ACCOUNT_CONTAINER_MARGIN_TOP, ResourceType.DIMENSION),
+
+  // Margin bottom of the account container
+  CONFIG_ACCOUNT_CONTAINER_MARGIN_BOTTOM(
+      PartnerConfigKey.KEY_ACCOUNT_CONTAINER_MARGIN_BOTTOM, ResourceType.DIMENSION),
+
   // Text size of the body content text
   CONFIG_CONTENT_TEXT_SIZE(PartnerConfigKey.KEY_CONTENT_TEXT_SIZE, ResourceType.DIMENSION),
 
@@ -352,6 +360,10 @@ public enum PartnerConfig {
   // The summary font family of list items.
   CONFIG_ITEMS_SUMMARY_FONT_FAMILY(
       PartnerConfigKey.KEY_ITEMS_SUMMARY_FONT_FAMILY, ResourceType.STRING),
+
+  // Font variation_settings of the list items title.
+  CONFIG_ITEMS_TITLE_FONT_VARIATION_SETTINGS(
+      PartnerConfigKey.KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS, ResourceType.STRING),
 
   // The padding top of list items.
   CONFIG_ITEMS_PADDING_TOP(PartnerConfigKey.KEY_ITEMS_PADDING_TOP, ResourceType.DIMENSION),

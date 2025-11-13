@@ -16,31 +16,28 @@
 
 package com.google.android.setupcompat.internal;
 
+import com.google.android.setupcompat.util.Logger;
+
 /** Commonly used validations and preconditions. */
 public final class Validations {
+  private static final Logger LOG = new Logger("Validations");
 
   /**
-   * Asserts that the {@code length} is in the expected range.
-   *
-   * @throws IllegalArgumentException if {@code input}'s length is than {@code minLength} or
-   *     greather than {@code maxLength}.
-   */
-  public static void assertLengthInRange(int length, String name, int minLength, int maxLength) {
-    Preconditions.checkArgument(
-        length <= maxLength && length >= minLength,
-        String.format("Length of %s should be in the range [%s-%s]", name, minLength, maxLength));
-  }
-
-  /**
-   * Asserts that the {@code input}'s length is in the expected range.
-   *
-   * @throws NullPointerException if {@code input} is null.
-   * @throws IllegalArgumentException if {@code input}'s length is than {@code minLength} or
-   *     greather than {@code maxLength}.
+   * Asserts that the {@code input}'s length is in the expected range. Print wtf if {@code input} is
+   * null or {@code input}'s length is shorter than {@code minLength} or greater than {@code
+   * maxLength}.
    */
   public static void assertLengthInRange(String input, String name, int minLength, int maxLength) {
-    Preconditions.checkNotNull(input, String.format("%s cannot be null.", name));
-    assertLengthInRange(input.length(), name, minLength, maxLength);
+    if (input == null) {
+      LOG.e(String.format("Input of %s cannot be null", name));
+      return;
+    }
+
+    if (input.length() > maxLength || input.length() < minLength) {
+      LOG.e(
+          String.format(
+              "Length of \"%s\" should be in the range [%s-%s]", input, minLength, maxLength));
+    }
   }
 
   private Validations() {

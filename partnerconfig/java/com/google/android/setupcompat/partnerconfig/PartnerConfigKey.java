@@ -96,6 +96,8 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_ACCOUNT_NAME_FONT_FAMILY,
   PartnerConfigKey.KEY_ACCOUNT_AVATAR_MARGIN_END,
   PartnerConfigKey.KEY_ACCOUNT_AVATAR_MAX_SIZE,
+  PartnerConfigKey.KEY_ACCOUNT_CONTAINER_MARGIN_TOP,
+  PartnerConfigKey.KEY_ACCOUNT_CONTAINER_MARGIN_BOTTOM,
   PartnerConfigKey.KEY_CONTENT_TEXT_SIZE,
   PartnerConfigKey.KEY_CONTENT_TEXT_COLOR,
   PartnerConfigKey.KEY_CONTENT_LINK_TEXT_COLOR,
@@ -121,6 +123,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_ITEMS_GROUP_CORNER_RADIUS,
   PartnerConfigKey.KEY_ITEMS_MIN_HEIGHT,
   PartnerConfigKey.KEY_ITEMS_DIVIDER_SHOWN,
+  PartnerConfigKey.KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_DEFAULT,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_ACCOUNT,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_CONNECTION,
@@ -380,6 +383,12 @@ public @interface PartnerConfigKey {
   // Size of the account avatar
   String KEY_ACCOUNT_AVATAR_MAX_SIZE = "setup_design_account_avatar_size";
 
+  // Margin top of the account container
+  String KEY_ACCOUNT_CONTAINER_MARGIN_TOP = "setup_design_account_container_margin_top";
+
+  // Margin bottom of the account container
+  String KEY_ACCOUNT_CONTAINER_MARGIN_BOTTOM = "setup_design_account_container_margin_bottom";
+
   // Text size of the body content text
   String KEY_CONTENT_TEXT_SIZE = "setup_design_content_text_size";
 
@@ -448,6 +457,10 @@ public @interface PartnerConfigKey {
 
   // The divider of list items are showing.
   String KEY_ITEMS_DIVIDER_SHOWN = "setup_design_items_divider_shown";
+
+  // Font weight of the header
+  String KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS =
+      "setup_design_items_title_font_variation_settings";
 
   // The intrinsic width of the card view for foldable/tablet.
   String KEY_CARD_VIEW_INTRINSIC_WIDTH = "setup_design_card_view_intrinsic_width";
