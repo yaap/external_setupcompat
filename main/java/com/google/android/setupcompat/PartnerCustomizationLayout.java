@@ -528,7 +528,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
             "onApplyWindowInsets SystemWindowInsetBottom=" + insets.getSystemWindowInsetBottom());
       }
       // Edge to edge extend the footer bar padding bottom to the navigation bar height.
-      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && insets.getSystemWindowInsetBottom() > 0) {
+      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && insets.getSystemWindowInsetBottom() >= 0) {
         LOG.atDebug("NavigationBarHeight: " + insets.getSystemWindowInsetBottom());
         FooterBarMixin footerBarMixin = getMixin(FooterBarMixin.class);
         LinearLayout buttonContainer = footerBarMixin.getButtonContainer();
@@ -561,20 +561,31 @@ public class PartnerCustomizationLayout extends TemplateLayout {
           }
           view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), 0);
         } else {
-          View intrinsicSizeView = findViewById(R.id.suc_intrinsic_size_layout);
-          if (intrinsicSizeView != null) {
-            intrinsicSizeView.setPadding(
-                intrinsicSizeView.getPaddingLeft(),
-                intrinsicSizeView.getPaddingTop(),
-                intrinsicSizeView.getPaddingRight(),
-                footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
-            view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), 0);
-          } else {
-            view.setPadding(
-                view.getPaddingLeft(),
-                view.getPaddingTop(),
-                view.getPaddingRight(),
-                footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+          if (insets.getSystemWindowInsetBottom() > 0) {
+            /*
+             * When no footer bar is visible, we handle the bottom inset differently depending on the
+             * navigation mode or simple mode. In gesture navigation mode (where bottom inset > 0), we add padding to push the
+             * content card up from the navigation bar. In 3-button navigation mode or simple mode in landscape (where bottom inset == 0), we do NOT add any
+             * padding. This allows the content to extend to the bottom of the screen.
+             */
+            View intrinsicSizeView = findViewById(R.id.suc_intrinsic_size_layout);
+            if (intrinsicSizeView != null) {
+              LOG.atDebug("intrinsicSizeView is not null");
+              intrinsicSizeView.setPadding(
+                  intrinsicSizeView.getPaddingLeft(),
+                  intrinsicSizeView.getPaddingTop(),
+                  intrinsicSizeView.getPaddingRight(),
+                  footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+              view.setPadding(
+                  view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), 0);
+            } else {
+              LOG.atDebug("intrinsicSizeView is null");
+              view.setPadding(
+                  view.getPaddingLeft(),
+                  view.getPaddingTop(),
+                  view.getPaddingRight(),
+                  footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+            }
           }
         }
       }
