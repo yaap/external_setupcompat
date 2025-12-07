@@ -93,7 +93,9 @@ public class FooterButtonStyleUtils {
     int color =
         PartnerConfigHelper.get(context)
             .getColor(context, PartnerConfig.CONFIG_FOOTER_SECONDARY_BUTTON_BG_COLOR);
-    if (color != Color.TRANSPARENT) {
+    // If the color is not transparent and dynamic color is not applied, use the primary button
+    // style to customize the secondary button background color.
+    if (color != Color.TRANSPARENT && !applyDynamicColor) {
       defaultTheme = R.style.SucPartnerCustomizationButton_Primary;
     }
     // Setup button partner config

@@ -164,6 +164,14 @@ public enum PartnerConfig {
   CONFIG_FOOTER_SECONDARY_BUTTON_MARGIN_START(
       PartnerConfigKey.KEY_FOOTER_SECONDARY_BUTTON_MARGIN_START, ResourceType.DIMENSION),
 
+  // Middle space of the footer button
+  CONFIG_FOOTER_BUTTON_MIDDLE_SPACE(
+      PartnerConfigKey.KEY_FOOTER_BUTTON_MIDDLE_SPACE, ResourceType.DIMENSION),
+
+  // Middle space of the stacked footer button
+  CONFIG_FOOTER_BUTTON_STACK_MIDDLE_SPACE(
+      PartnerConfigKey.KEY_FOOTER_BUTTON_STACK_MIDDLE_SPACE, ResourceType.DIMENSION),
+
   // Background color of layout
   CONFIG_LAYOUT_BACKGROUND_COLOR(PartnerConfigKey.KEY_LAYOUT_BACKGROUND_COLOR, ResourceType.COLOR),
 
@@ -210,6 +218,9 @@ public enum PartnerConfig {
   // Size of the icon
   CONFIG_ICON_SIZE(PartnerConfigKey.KEY_ICON_SIZE, ResourceType.DIMENSION),
 
+  // Color of the icon
+  CONFIG_ICON_COLOR(PartnerConfigKey.KEY_ICON_COLOR, ResourceType.COLOR),
+
   // The max width of the illustration
   CONFIG_ILLUSTRATION_MAX_WIDTH(
       PartnerConfigKey.KEY_ILLUSTRATION_MAX_WIDTH, ResourceType.DIMENSION),
@@ -225,6 +236,10 @@ public enum PartnerConfig {
   // Margin bottom of the header container
   CONFIG_HEADER_CONTAINER_MARGIN_BOTTOM(
       PartnerConfigKey.KEY_HEADER_CONTAINER_MARGIN_BOTTOM, ResourceType.DIMENSION),
+
+  // The flag to enable/disable the common style of the progress bar on header area
+  CONFIG_HEADER_PROGRESS_BAR_COMMON_STYLE(
+      PartnerConfigKey.KEY_HEADER_PROGRESS_BAR_COMMON_STYLE, ResourceType.BOOL),
 
   // Auto text size enabled status
   CONFIG_HEADER_AUTO_SIZE_ENABLED(PartnerConfigKey.KEY_HEADER_AUTO_SIZE_ENABLED, ResourceType.BOOL),
@@ -443,7 +458,13 @@ public enum PartnerConfig {
   CONFIG_LOADING_LOTTIE_FINAL_HOLD(
       PartnerConfigKey.KEY_LOADING_LOTTIE_FINAL_HOLD, ResourceType.ILLUSTRATION),
 
-  // The transition type to decide the transition between activities or fragments.
+  /**
+   * The transition type to decide the transition between activities or fragments.
+   *
+   * @deprecated Deprecated to use CONFIG_TRANSITION_SHARED_X_AXIS transition, so it never has
+   *     activity options input.
+   */
+  @Deprecated
   CONFIG_TRANSITION_TYPE(PartnerConfigKey.KEY_TRANSITION_TYPE, ResourceType.INTEGER),
 
   // The list of keypath and color map, applied to default animation when light theme.
@@ -524,7 +545,11 @@ public enum PartnerConfig {
 
   // The adapt window width to be part of determining two pane style condition
   CONFIG_TWO_PANE_ADAPT_WINDOW_WIDTH(
-      PartnerConfigKey.KEY_TWO_PANE_ADAPT_WINDOW_WIDTH, ResourceType.INTEGER);
+      PartnerConfigKey.KEY_TWO_PANE_ADAPT_WINDOW_WIDTH, ResourceType.INTEGER),
+
+  // The selected radius of the card view.
+  CONFIG_CARD_VIEW_SELECTED_RADIUS(
+      PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS, ResourceType.DIMENSION);
 
   /** Resource type of the partner resources type. */
   public enum ResourceType {

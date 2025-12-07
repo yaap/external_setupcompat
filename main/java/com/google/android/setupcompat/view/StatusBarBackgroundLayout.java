@@ -16,6 +16,7 @@
 
 package com.google.android.setupcompat.view;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -29,6 +30,7 @@ import android.widget.FrameLayout;
 import com.google.android.setupcompat.R;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 import com.google.android.setupcompat.util.Logger;
+import java.util.Locale;
 
 /**
  * A FrameLayout subclass that will responds to onApplyWindowInsets to draw a drawable in the top
@@ -44,7 +46,7 @@ public class StatusBarBackgroundLayout extends FrameLayout {
   private static final Logger LOG = new Logger("StatusBarBgLayout");
 
   private Drawable statusBarBackground;
-  private Object lastInsets; // Use generic Object type for compatibility
+  private WindowInsets lastInsets;
 
   public StatusBarBackgroundLayout(Context context) {
     super(context);
@@ -74,7 +76,7 @@ public class StatusBarBackgroundLayout extends FrameLayout {
     super.onDraw(canvas);
     if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       if (lastInsets != null) {
-        final int insetTop = ((WindowInsets) lastInsets).getSystemWindowInsetTop();
+        final int insetTop = lastInsets.getSystemWindowInsetTop();
         if (insetTop > 0) {
           statusBarBackground.setBounds(
               /* left= */ 0, /* top= */ 0, /* right= */ getWidth(), /* bottom= */ insetTop);
@@ -98,20 +100,35 @@ public class StatusBarBackgroundLayout extends FrameLayout {
   }
 
   @Override
+  @SuppressLint("NewApi")
   public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-    // TODO: b/398407478 - Add test case for edge to edge to layout from library.
-    if (PartnerConfigHelper.isGlifExpressiveEnabled(getContext())) {
-      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && insets.getSystemWindowInsetBottom() > 0) {
-        LOG.atDebug("NavigationBarHeight: " + insets.getSystemWindowInsetBottom());
-        insets =
-            insets.replaceSystemWindowInsets(
-                0,
-                insets.getSystemWindowInsetTop(),
-                0,
-                findViewById(R.id.suc_layout_status).getPaddingBottom());
-      }
-    }
-    lastInsets = insets;
-    return super.onApplyWindowInsets(insets);
+    lastInsets =
+        shouldApplyEdgeToEdge(insets.getSystemWindowInsetBottom())
+            ? applyEdgeToEdge(insets)
+            : insets;
+    return super.onApplyWindowInsets(lastInsets);
+  }
+
+  private boolean shouldApplyEdgeToEdge(int windowInsetBottom) {
+    boolean glifExpressiveEnabled = PartnerConfigHelper.isGlifExpressiveEnabled(getContext());
+    boolean isAtLeastLollipop = VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP;
+    LOG.atInfo(
+        String.format(
+            Locale.US,
+            "Apply edge to edge, glifExpressiveEnabled: %s, isAtLeastLollipop: %s,"
+                + " windowInsetBottom: %d",
+            glifExpressiveEnabled,
+            isAtLeastLollipop,
+            windowInsetBottom));
+    return glifExpressiveEnabled && isAtLeastLollipop && windowInsetBottom > 0;
+  }
+
+  @SuppressLint("NewApi")
+  private WindowInsets applyEdgeToEdge(WindowInsets insets) {
+    return insets.replaceSystemWindowInsets(
+        0,
+        insets.getSystemWindowInsetTop(),
+        0,
+        findViewById(R.id.suc_layout_status).getPaddingBottom());
   }
 }

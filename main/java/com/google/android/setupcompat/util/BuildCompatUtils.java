@@ -75,5 +75,15 @@ public final class BuildCompatUtils {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM;
   }
 
+  /**
+   * Implementation of BuildCompat.isAtLeastBaklava() suitable for use in Setup
+   *
+   * @return Whether the current OS version is higher or equal to Baklava.
+   */
+  @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.BAKLAVA)
+  public static boolean isAtLeastBaklava() {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA;
+  }
+
   private BuildCompatUtils() {}
 }

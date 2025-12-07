@@ -523,6 +523,10 @@ public class PartnerCustomizationLayout extends TemplateLayout {
   public WindowInsets onApplyWindowInsets(WindowInsets insets) {
     // TODO: b/398407478 - Add test case for edge to edge to layout from library.
     if (PartnerConfigHelper.isGlifExpressiveEnabled(getContext())) {
+      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        LOG.atInfo(
+            "onApplyWindowInsets SystemWindowInsetBottom=" + insets.getSystemWindowInsetBottom());
+      }
       // Edge to edge extend the footer bar padding bottom to the navigation bar height.
       if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && insets.getSystemWindowInsetBottom() > 0) {
         LOG.atDebug("NavigationBarHeight: " + insets.getSystemWindowInsetBottom());
@@ -547,13 +551,31 @@ public class PartnerCustomizationLayout extends TemplateLayout {
               buttonContainer.getPaddingTop(),
               buttonContainer.getPaddingRight(),
               footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+          View intrinsicSizeView = findViewById(R.id.suc_intrinsic_size_layout);
+          if (intrinsicSizeView != null) {
+            intrinsicSizeView.setPadding(
+                intrinsicSizeView.getPaddingLeft(),
+                intrinsicSizeView.getPaddingTop(),
+                intrinsicSizeView.getPaddingRight(),
+                0);
+          }
           view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), 0);
         } else {
-          view.setPadding(
-              view.getPaddingLeft(),
-              view.getPaddingTop(),
-              view.getPaddingRight(),
-              footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+          View intrinsicSizeView = findViewById(R.id.suc_intrinsic_size_layout);
+          if (intrinsicSizeView != null) {
+            intrinsicSizeView.setPadding(
+                intrinsicSizeView.getPaddingLeft(),
+                intrinsicSizeView.getPaddingTop(),
+                intrinsicSizeView.getPaddingRight(),
+                footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+            view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), 0);
+          } else {
+            view.setPadding(
+                view.getPaddingLeft(),
+                view.getPaddingTop(),
+                view.getPaddingRight(),
+                footerBarPaddingBottom + insets.getSystemWindowInsetBottom());
+          }
         }
       }
     }

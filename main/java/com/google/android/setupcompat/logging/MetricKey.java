@@ -166,6 +166,6 @@ public final class MetricKey implements Parcelable {
   private static final int MAX_METRIC_KEY_LENGTH = 30;
   private static final Pattern METRIC_KEY_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]+");
   private static final Pattern SCREEN_COMPONENTNAME_PATTERN =
-      Pattern.compile("^([a-z]+[.])+[A-Z][a-zA-Z0-9_$]+");
+      Pattern.compile("^([a-z][a-z0-9_]+[.])+[A-Z][a-zA-Z0-9_$]+");
   private static final Pattern SCREEN_NAME_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_$]+");
 }
