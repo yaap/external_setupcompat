@@ -530,6 +530,13 @@ public class PartnerCustomizationLayout extends TemplateLayout {
       // Edge to edge extend the footer bar padding bottom to the navigation bar height.
       if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && insets.getSystemWindowInsetBottom() >= 0) {
         LOG.atDebug("NavigationBarHeight: " + insets.getSystemWindowInsetBottom());
+
+        // For modal dialog, vertical insets are handled within InsetAdjustmentLayout and
+        // IntrinsicSizeFrameLayout.
+        if (PartnerConfigHelper.shouldApplyModalDialog(getContext())) {
+          return super.onApplyWindowInsets(insets);
+        }
+
         FooterBarMixin footerBarMixin = getMixin(FooterBarMixin.class);
         LinearLayout buttonContainer = footerBarMixin.getButtonContainer();
         View view = findViewById(R.id.suc_layout_status);
