@@ -164,10 +164,6 @@ public class PartnerConfigHelper {
 
   @VisibleForTesting public static Bundle enableMetricsLoggingBundle = null;
 
-  @SuppressWarnings("NonFinalStaticField")
-  @VisibleForTesting
-  public static Bundle suwUseModalDialogBundle = null;
-
   @VisibleForTesting public static int savedOrientation = Configuration.ORIENTATION_PORTRAIT;
 
   /** The method name to get if transition settings is set from client. */
@@ -876,7 +872,6 @@ public class PartnerConfigHelper {
     applyGlifExpressiveBundle = null;
     keyboardFocusEnhancementBundle = null;
     enableMetricsLoggingBundle = null;
-    suwUseModalDialogBundle = null;
   }
 
   /**
@@ -1257,21 +1252,19 @@ public class PartnerConfigHelper {
 
   /** Returns true if the SetupWizard use modal dialog. */
   public static boolean isSuwUseModalDialogEnabled(@NonNull Context context) {
-    if (suwUseModalDialogBundle == null || suwUseModalDialogBundle.isEmpty()) {
-      try {
-        suwUseModalDialogBundle =
-            context
-                .getContentResolver()
-                .call(
-                    getContentUri(),
-                    IS_SUW_USE_MODAL_DIALOG_ENABLED,
-                    /* arg= */ null,
-                    /* extras= */ null);
-      } catch (IllegalArgumentException | SecurityException exception) {
-        Log.w(TAG, "Method " + IS_SUW_USE_MODAL_DIALOG_ENABLED + " is unknown");
-        suwUseModalDialogBundle = null;
-        return false;
-      }
+    Bundle suwUseModalDialogBundle = null;
+    try {
+      suwUseModalDialogBundle =
+          context
+              .getContentResolver()
+              .call(
+                  getContentUri(),
+                  IS_SUW_USE_MODAL_DIALOG_ENABLED,
+                  /* arg= */ null,
+                  /* extras= */ null);
+    } catch (IllegalArgumentException | SecurityException exception) {
+      Log.w(TAG, "Method " + IS_SUW_USE_MODAL_DIALOG_ENABLED + " is unknown");
+      return false;
     }
 
     if (suwUseModalDialogBundle != null && !suwUseModalDialogBundle.isEmpty()) {
