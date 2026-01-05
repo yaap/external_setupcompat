@@ -120,7 +120,7 @@ public final class WizardManagerHelper {
    * @return A new intent that can be used with {@link Activity#startActivityForResult(Intent, int)}
    *     to start the next step of the setup flow.
    */
-  public static Intent getNextIntent(Intent originalIntent, int resultCode, Intent data) {
+  public static Intent getNextIntent(Intent originalIntent, int resultCode, @Nullable Intent data) {
     Intent intent = new Intent(ACTION_NEXT);
     copyWizardManagerExtras(originalIntent, intent);
     intent.putExtra(EXTRA_RESULT_CODE, resultCode);

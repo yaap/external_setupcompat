@@ -82,7 +82,8 @@ public class NotificationComponent implements Parcelable {
     NotificationType.PREDEFERRED_PREPARING,
     NotificationType.DEFERRED,
     NotificationType.DEFERRED_ONGOING,
-    NotificationType.PORTAL
+    NotificationType.PORTAL,
+    NotificationType.SETUP_COMPANION,
   })
   public @interface NotificationType {
     int UNKNOWN = 0;
@@ -92,7 +93,8 @@ public class NotificationComponent implements Parcelable {
     int DEFERRED = 4;
     int DEFERRED_ONGOING = 5;
     int PORTAL = 6;
-    int MAX = 7;
+    int SETUP_COMPANION = 7;
+    int MAX = 8;
   }
 
   public static class Builder {

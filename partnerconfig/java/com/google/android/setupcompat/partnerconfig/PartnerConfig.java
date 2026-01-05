@@ -555,8 +555,20 @@ public enum PartnerConfig {
   CONFIG_CARD_VIEW_SELECTED_RADIUS(
       PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS, ResourceType.DIMENSION),
 
+  // The package name of assistive options.
+  CONFIG_ASSISTIVE_OPTIONS_PACKAGE_NAME(
+      PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_PACKAGE_NAME, ResourceType.STRING),
+
+  // The activity name of assistive options.
+  CONFIG_ASSISTIVE_OPTIONS_ACTIVITY_NAME(
+      PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_ACTIVITY_NAME, ResourceType.STRING),
+
   // The background color of list items.
-  CONFIG_ITEMS_BACKGROUND_COLOR(PartnerConfigKey.KEY_ITEMS_BACKGROUND_COLOR, ResourceType.COLOR);
+  CONFIG_ITEMS_BACKGROUND_COLOR(PartnerConfigKey.KEY_ITEMS_BACKGROUND_COLOR, ResourceType.COLOR),
+
+  // The flag to allow hide footer bar when IME shown.
+  CONFIG_FOOTER_BAR_HIDE_WHEN_IME_SHOWN(
+      PartnerConfigKey.KEY_FOOTER_BAR_HIDE_WHEN_IME_SHOWN, ResourceType.BOOL);
 
   /** Resource type of the partner resources type. */
   public enum ResourceType {
