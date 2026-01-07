@@ -94,16 +94,32 @@ public class PartnerConfigHelper {
   public static final String IS_GLIF_EXPRESSIVE_ENABLED = "isGlifExpressiveEnabled";
 
   @VisibleForTesting
+  public static final String IS_DELIGHTFUL_SETUP_ENABLED = "isDelightfulSetupEnabled";
+
+  @VisibleForTesting public static final String IS_ANIMATED_ICON_ENABLED = "isAnimatedIconEnabled";
+
+  @VisibleForTesting
+  public static final String IS_ANIMATED_QR_CODE_ENABLED = "isAnimatedQrCodeEnabled";
+
+  @VisibleForTesting
   public static final String IS_ENHANCED_SETUP_DESIGN_METRICS_ENABLED =
       "isEnhancedSetupDesignMetricsEnabled";
 
   @VisibleForTesting
   public static final String IS_SUW_USE_MODAL_DIALOG_ENABLED = "isSuwUseModalDialogEnabled";
 
+  @VisibleForTesting
+  public static final String IS_SUW_USE_A11Y_SHORTCUT_ENABLED = "isSuwUseA11yShortcutEnabled";
+
   /** The method name to get the if the keyboard focus enhancement enabled */
   @VisibleForTesting
   public static final String IS_KEYBOARD_FOCUS_ENHANCEMENT_ENABLED_METHOD =
       "isKeyboardFocusEnhancementEnabled";
+
+  public static final String IS_SUW_JOINED_UP_LOADING_ENABLED = "isSuwJoinedUpLoadingEnabled";
+
+  /** The method name to get if the One Tap (go/one-tap) feature is enabled. */
+  @VisibleForTesting public static final String IS_ONE_TAP_ENABLED = "isOneTapEnabled";
 
   @VisibleForTesting
   public static final String GET_SUW_DEFAULT_THEME_STRING_METHOD = "suwDefaultThemeString";
@@ -138,6 +154,10 @@ public class PartnerConfigHelper {
 
   @VisibleForTesting public static Bundle keyboardFocusEnhancementBundle = null;
 
+  @VisibleForTesting public static Bundle suwJoinedUpLoadingBundle = null;
+
+  @VisibleForTesting public static Bundle oneTapBundle = null;
+
   private static PartnerConfigHelper instance = null;
 
   @VisibleForTesting Bundle resultBundle = null;
@@ -162,7 +182,17 @@ public class PartnerConfigHelper {
 
   @VisibleForTesting public static Bundle applyGlifExpressiveBundle = null;
 
+  private static Bundle enableDelightfulSetupBundle = null;
+
+  private static Bundle enableAnimatedIconBundle = null;
+
+  private static Bundle enableAnimatedQrCodeBundle = null;
+
   @VisibleForTesting public static Bundle enableMetricsLoggingBundle = null;
+
+  @SuppressWarnings("NonFinalStaticField")
+  @VisibleForTesting
+  public static Bundle suwUseA11yShortcutBundle = null;
 
   @VisibleForTesting public static int savedOrientation = Configuration.ORIENTATION_PORTRAIT;
 
@@ -871,7 +901,13 @@ public class PartnerConfigHelper {
     applyForceTwoPaneBundle = null;
     applyGlifExpressiveBundle = null;
     keyboardFocusEnhancementBundle = null;
+    enableDelightfulSetupBundle = null;
+    enableAnimatedIconBundle = null;
+    enableAnimatedQrCodeBundle = null;
     enableMetricsLoggingBundle = null;
+    suwJoinedUpLoadingBundle = null;
+    oneTapBundle = null;
+    suwUseA11yShortcutBundle = null;
   }
 
   /**
@@ -1137,7 +1173,7 @@ public class PartnerConfigHelper {
   }
 
   /** Returns a boolean indicate whether the force two pane feature enable or not. */
-  public static boolean isForceTwoPaneEnabled(@NonNull Context context) {
+  public static synchronized boolean isForceTwoPaneEnabled(@NonNull Context context) {
     if (applyForceTwoPaneBundle == null || applyForceTwoPaneBundle.isEmpty()) {
       try {
         applyForceTwoPaneBundle =
@@ -1159,7 +1195,7 @@ public class PartnerConfigHelper {
   }
 
   /** Returns whether the keyboard focus enhancement is enabled. */
-  public static boolean isKeyboardFocusEnhancementEnabled(@NonNull Context context) {
+  public static synchronized boolean isKeyboardFocusEnhancementEnabled(@NonNull Context context) {
     if (keyboardFocusEnhancementBundle == null || keyboardFocusEnhancementBundle.isEmpty()) {
       try {
         keyboardFocusEnhancementBundle =
@@ -1180,6 +1216,49 @@ public class PartnerConfigHelper {
       return false;
     }
     return keyboardFocusEnhancementBundle.getBoolean(IS_KEYBOARD_FOCUS_ENHANCEMENT_ENABLED_METHOD);
+  }
+
+  public static boolean isSuwJoinedUpLoadingEnabled(@NonNull Context context) {
+    if (suwJoinedUpLoadingBundle == null || suwJoinedUpLoadingBundle.isEmpty()) {
+      try {
+        suwJoinedUpLoadingBundle =
+            context
+                .getContentResolver()
+                .call(
+                    getContentUri(),
+                    IS_SUW_JOINED_UP_LOADING_ENABLED,
+                    /* arg= */ null,
+                    /* extras= */ null);
+      } catch (IllegalArgumentException | SecurityException exception) {
+        Log.w(TAG, "SetupWizard joined up loading status unknown; return as false.");
+        suwJoinedUpLoadingBundle = null;
+        return false;
+      }
+    }
+    if (suwJoinedUpLoadingBundle == null || suwJoinedUpLoadingBundle.isEmpty()) {
+      return false;
+    }
+    return suwJoinedUpLoadingBundle.getBoolean(IS_SUW_JOINED_UP_LOADING_ENABLED);
+  }
+
+  /** Returns true if the One Tap feature is enabled in SetupWizard. */
+  public static boolean isOneTapEnabled(@NonNull Context context) {
+    if (oneTapBundle == null || oneTapBundle.isEmpty()) {
+      try {
+        oneTapBundle =
+            context
+                .getContentResolver()
+                .call(getContentUri(), IS_ONE_TAP_ENABLED, /* arg= */ null, /* extras= */ null);
+      } catch (IllegalArgumentException | SecurityException exception) {
+        Log.w(TAG, "SetupWizard One Tap status unknown; return as false.");
+        oneTapBundle = null;
+        return false;
+      }
+    }
+    if (oneTapBundle == null || oneTapBundle.isEmpty()) {
+      return false;
+    }
+    return oneTapBundle.getBoolean(IS_ONE_TAP_ENABLED);
   }
 
   /**
@@ -1209,19 +1288,63 @@ public class PartnerConfigHelper {
       }
     }
     if (context.getTheme() != null) {
-        TypedArray a =
-            context
-                .getTheme()
-                .obtainStyledAttributes(new int[] {R.attr.sucGlifExpressiveStyleEnabled});
-        boolean isGlifExpressiveStyleEnabled = a.getBoolean(0, false);
-        a.recycle();
-        Log.i(TAG, "isGlifExpressiveStyleEnabled is " + isGlifExpressiveStyleEnabled);
-        if (isGlifExpressiveStyleEnabled) {
-          return true;
+      TypedArray a =
+          context
+              .getTheme()
+              .obtainStyledAttributes(new int[] {R.attr.sucGlifExpressiveStyleEnabled});
+      boolean isGlifExpressiveStyleEnabled = a.getBoolean(0, false);
+      a.recycle();
+      Log.i(TAG, "isGlifExpressiveStyleEnabled is " + isGlifExpressiveStyleEnabled);
+      if (isGlifExpressiveStyleEnabled) {
+        return true;
       }
     }
 
     return false;
+  }
+
+  /** Returns true if the SetupWizard supports delightful style during setup flow. */
+  public static boolean isDelightfulSetupEnabled(@NonNull Context context) {
+    enableDelightfulSetupBundle =
+        getPartnerBundle(context, IS_DELIGHTFUL_SETUP_ENABLED, enableDelightfulSetupBundle);
+    if (enableDelightfulSetupBundle != null && !enableDelightfulSetupBundle.isEmpty()) {
+      return enableDelightfulSetupBundle.getBoolean(IS_DELIGHTFUL_SETUP_ENABLED, false);
+    }
+    return false;
+  }
+
+  /** Returns true if the SetupWizard supports animated header icon during setup flow. */
+  public static boolean isAnimatedIconEnabled(Context context) {
+    enableAnimatedIconBundle =
+        getPartnerBundle(context, IS_ANIMATED_ICON_ENABLED, enableAnimatedIconBundle);
+    if (enableAnimatedIconBundle != null && !enableAnimatedIconBundle.isEmpty()) {
+      return enableAnimatedIconBundle.getBoolean(IS_ANIMATED_ICON_ENABLED, false);
+    }
+    return false;
+  }
+
+  /** Returns true if the SetupWizard supports animated qr code during setup flow. */
+  public static boolean isAnimatedQrCodeEnabled(Context context) {
+    enableAnimatedQrCodeBundle =
+        getPartnerBundle(context, IS_ANIMATED_QR_CODE_ENABLED, enableAnimatedQrCodeBundle);
+    if (enableAnimatedQrCodeBundle != null && !enableAnimatedQrCodeBundle.isEmpty()) {
+      return enableAnimatedQrCodeBundle.getBoolean(IS_ANIMATED_QR_CODE_ENABLED, false);
+    }
+    return false;
+  }
+
+  @Nullable
+  private static Bundle getPartnerBundle(
+      @NonNull Context context, @NonNull String flagName, @Nullable Bundle bundle) {
+    if (bundle == null || bundle.isEmpty()) {
+      try {
+        return context.getContentResolver().call(getContentUri(), flagName, null, null);
+      } catch (IllegalArgumentException | SecurityException exception) {
+        Log.w(TAG, flagName + " status is unknown; return as false.");
+        return null;
+      }
+    }
+    return bundle;
   }
 
   /** Returns true if the SetupWizard enable the UI component logging. */
@@ -1271,6 +1394,16 @@ public class PartnerConfigHelper {
       return suwUseModalDialogBundle.getBoolean(IS_SUW_USE_MODAL_DIALOG_ENABLED, false);
     }
 
+    return false;
+  }
+
+  /** Returns true if the SetupWizard use a11y shortcut. */
+  public static boolean isSuwUseA11yShortcutEnabled(@NonNull Context context) {
+    suwUseA11yShortcutBundle =
+        getPartnerBundle(context, IS_SUW_USE_A11Y_SHORTCUT_ENABLED, suwUseA11yShortcutBundle);
+    if (suwUseA11yShortcutBundle != null && !suwUseA11yShortcutBundle.isEmpty()) {
+      return suwUseA11yShortcutBundle.getBoolean(IS_SUW_USE_A11Y_SHORTCUT_ENABLED, false);
+    }
     return false;
   }
 

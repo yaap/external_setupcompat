@@ -351,6 +351,12 @@ public class FooterBarMixin implements Mixin {
           new ButtonInflatedEvent(getSecondaryButtonView(), LoggingObserver.ButtonType.SECONDARY));
       getSecondaryButton().setLoggingObserver(observer);
     }
+    // Same for tertiary button.
+    if (tertiaryButtonId != 0) {
+      loggingObserver.log(
+          new ButtonInflatedEvent(getSecondaryButtonView(), LoggingObserver.ButtonType.TERTIARY));
+      getSecondaryButton().setLoggingObserver(observer);
+    }
   }
 
   protected boolean isFooterButtonAlignedEnd() {
@@ -529,7 +535,7 @@ public class FooterBarMixin implements Mixin {
       defaultPartnerTheme = R.style.SucPartnerCustomizationButton_Primary;
     }
 
-    // TODO: b/364980746 - Use partner config to allow user to customize primary bg color.
+    // TODO: Use partner config to allow user to customize primary bg color.
     // Setup button partner config
     FooterButtonPartnerConfig footerButtonPartnerConfig =
         new FooterButtonPartnerConfig.Builder(footerButton)
@@ -840,6 +846,11 @@ public class FooterBarMixin implements Mixin {
     }
     onFooterButtonApplyPartnerResource(button, footerButtonPartnerConfig);
 
+    if (loggingObserver != null) {
+      loggingObserver.log(new ButtonInflatedEvent(button, LoggingObserver.ButtonType.TERTIARY));
+      footerButton.setLoggingObserver(loggingObserver);
+    }
+
     // Make sure the position of buttons are correctly and prevent tertiary button create twice or
     // more.
     repopulateButtons();
@@ -976,7 +987,7 @@ public class FooterBarMixin implements Mixin {
     }
   }
 
-  // TODO: b/369285240 - Migrate setButtonWidthForExpressiveStyle of FooterBarMixin to
+  // TODO: Migrate setButtonWidthForExpressiveStyle of FooterBarMixin to
   /** Sets button width for expressive style. */
   public void setButtonWidthForExpressiveStyle() {
     buttonContainer.post(
@@ -992,7 +1003,7 @@ public class FooterBarMixin implements Mixin {
           }
 
           updateMiddleSpacing();
-          // TODO: b/364981820 - Use partner config to allow user to customize button width.
+          // TODO: Use partner config to allow user to customize button width.
           int availableFooterBarWidth =
               containerWidth
                   - footerBarPaddingStart
@@ -1358,7 +1369,7 @@ public class FooterBarMixin implements Mixin {
   }
 
   private void setDownButtonStyle(Button button) {
-    // TODO: b/364121308 - Extract values as attributes.
+    // TODO: Extract values as attributes.
     int width =
         context.getResources().getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
     int height =

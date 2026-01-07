@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_FOOTER_BAR_MIN_HEIGHT,
   PartnerConfigKey.KEY_FOOTER_BAR_PADDING_START,
   PartnerConfigKey.KEY_FOOTER_BAR_PADDING_END,
+  PartnerConfigKey.KEY_FOOTER_BAR_HIDE_WHEN_IME_SHOWN,
   PartnerConfigKey.KEY_FOOTER_BUTTON_FONT_FAMILY,
   PartnerConfigKey.KEY_FOOTER_BUTTON_FONT_WEIGHT,
   PartnerConfigKey.KEY_FOOTER_BUTTON_ICON_ADD_ANOTHER,
@@ -163,6 +164,8 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_PROGRESS_BAR_MARGIN_BOTTOM,
   PartnerConfigKey.KEY_TWO_PANE_ADAPT_WINDOW_WIDTH,
   PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS,
+  PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_PACKAGE_NAME,
+  PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_ACTIVITY_NAME,
 })
 // TODO: can be removed and always reference PartnerConfig.getResourceName()?
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
@@ -199,6 +202,9 @@ public @interface PartnerConfigKey {
 
   // The padding end of the footer bar
   String KEY_FOOTER_BAR_PADDING_END = "setup_compat_footer_bar_padding_end";
+
+  // The flag to enable/disable hide footer bar when IME shown.
+  String KEY_FOOTER_BAR_HIDE_WHEN_IME_SHOWN = "setup_compat_footer_bar_hide_when_ime_shown";
 
   // The font face used in footer buttons. This must be a string reference to a font that is
   // available in the system. Font references (@font or @xml) are not allowed.
@@ -620,4 +626,10 @@ public @interface PartnerConfigKey {
 
   // The selected radius of the card view.
   String KEY_CARD_VIEW_SELECTED_RADIUS = "setup_design_card_view_selected_radius";
+
+  // The package name of assistive options.
+  String KEY_ASSISTIVE_OPTIONS_PACKAGE_NAME = "assistive_options_package_name";
+
+  // The activity name of assistive options.
+  String KEY_ASSISTIVE_OPTIONS_ACTIVITY_NAME = "assistive_options_activity_name";
 }
