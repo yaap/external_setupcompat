@@ -70,6 +70,9 @@ public final class WizardManagerHelper {
   /** Extra for notifying an Activity that it is inside the "Portal Setup" flow. */
   public static final String EXTRA_IS_PORTAL_SETUP = "portalSetup";
 
+  /** Extra for notifying an Activity that it is inside the "Custom Setup" flow. */
+  public static final String EXTRA_IS_CUSTOM_SETUP = "customSetup";
+
   /**
    * Extra for including a persistable map of Onboarding Node Id to MetadataStore.
    *
