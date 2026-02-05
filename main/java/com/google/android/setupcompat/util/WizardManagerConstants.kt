@@ -18,6 +18,8 @@ object WizardManagerConstants {
   const val EXTRA_IS_PRE_DEFERRED_SETUP = "preDeferredSetup"
   /** Extra for notifying an Activity that it is inside the "Portal Setup" flow. */
   const val EXTRA_IS_PORTAL_SETUP = "portalSetup"
+  /** Extra for notifying an Activity that it is inside the "Custom Setup" flow. */
+  const val EXTRA_IS_CUSTOM_SETUP = "customSetup"
   /**
    * Extra for including a persistable map of Onboarding Node Id to MetadataStore.
    * * <p>This will only be read and used by loading screens. Other screens should just pass this
