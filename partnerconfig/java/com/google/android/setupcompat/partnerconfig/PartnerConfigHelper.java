@@ -1243,17 +1243,18 @@ public class PartnerConfigHelper {
 
   /** Returns true if the One Tap feature is enabled in SetupWizard. */
   public static boolean isOneTapEnabled(@NonNull Context context) {
-    if (oneTapBundle == null || oneTapBundle.isEmpty()) {
-      try {
-        oneTapBundle =
-            context
-                .getContentResolver()
-                .call(getContentUri(), IS_ONE_TAP_ENABLED, /* arg= */ null, /* extras= */ null);
-      } catch (IllegalArgumentException | SecurityException exception) {
-        Log.w(TAG, "SetupWizard One Tap status unknown; return as false.");
-        oneTapBundle = null;
-        return false;
-      }
+    // We want to fetch the latest value of the flag, so we don't cache the result.
+    // This value is not so frequently read, so the performance impact of fetching the flag value
+    // may be acceptable.
+    try {
+      oneTapBundle =
+          context
+              .getContentResolver()
+              .call(getContentUri(), IS_ONE_TAP_ENABLED, /* arg= */ null, /* extras= */ null);
+    } catch (IllegalArgumentException | SecurityException exception) {
+      Log.w(TAG, "SetupWizard One Tap status unknown; return as false.");
+      oneTapBundle = null;
+      return false;
     }
     if (oneTapBundle == null || oneTapBundle.isEmpty()) {
       return false;
