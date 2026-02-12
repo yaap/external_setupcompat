@@ -2,11 +2,15 @@ package com.google.android.setupcompat.util
 
 import android.content.Context
 import android.content.Intent
+import com.android.onboarding.common.SETUP_WIZARD
+import com.android.onboarding.contracts.setupwizard.orchestrator.IowaWaitingScreenContract
 import com.android.onboarding.contracts.setupwizard.orchestrator.SetupWizardOrchestratorContract
 import com.android.onboarding.utils.persistable.PersistableIntent
 import com.android.onboarding.versions.OnboardingChanges
+import com.android.onboarding.versions.changes.JOINED_UP_LOADING
 import com.android.onboarding.versions.changes.UNIFIED_LOADING_EVERYWHERE
 import com.android.onboarding.wizardmanager.actions.PersistableWizardResult
+import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper
 import com.google.android.wizardmanager.wizardManagerExtras
 
 /**
@@ -38,7 +42,12 @@ object WizardManagerCompatHelper {
     resultCode: Int,
     data: Intent?,
   ): Intent {
-    return if (onboardingChanges.currentProcessSupportsChange(UNIFIED_LOADING_EVERYWHERE)) {
+    // TODO: Do not forward if joined_up_waiting isn't enabled.
+    return if (
+      onboardingChanges.componentSupportsChange(SETUP_WIZARD, UNIFIED_LOADING_EVERYWHERE) &&
+        onboardingChanges.componentSupportsChange(SETUP_WIZARD, JOINED_UP_LOADING) &&
+        PartnerConfigHelper.isSuwJoinedUpLoadingEnabled(context)
+    ) {
       getOrchestratorNextIntent(context, originalIntent, resultCode, data)
     } else {
       // fallback to legacy wizard manager
@@ -60,6 +69,6 @@ object WizardManagerCompatHelper {
 
     val argument = SetupWizardOrchestratorContract.OrchestratorArgument(extras, action)
 
-    return SetupWizardOrchestratorContract.createIntent(context, argument)
+    return IowaWaitingScreenContract.createIntent(context, argument)
   }
 }

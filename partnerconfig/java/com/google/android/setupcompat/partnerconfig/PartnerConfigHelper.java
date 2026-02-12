@@ -109,6 +109,9 @@ public class PartnerConfigHelper {
   public static final String IS_SUW_USE_MODAL_DIALOG_ENABLED = "isSuwUseModalDialogEnabled";
 
   @VisibleForTesting
+  public static final String IS_SUW_USE_DESKTOP_LAYOUT_ENABLED = "isSuwUseDesktopLayoutEnabled";
+
+  @VisibleForTesting
   public static final String IS_SUW_USE_A11Y_SHORTCUT_ENABLED = "isSuwUseA11yShortcutEnabled";
 
   /** The method name to get the if the keyboard focus enhancement enabled */
@@ -189,6 +192,10 @@ public class PartnerConfigHelper {
   private static Bundle enableAnimatedQrCodeBundle = null;
 
   @VisibleForTesting public static Bundle enableMetricsLoggingBundle = null;
+
+  @SuppressWarnings("NonFinalStaticField")
+  @VisibleForTesting
+  public static Bundle suwUseDesktopLayoutBundle = null;
 
   @SuppressWarnings("NonFinalStaticField")
   @VisibleForTesting
@@ -907,6 +914,7 @@ public class PartnerConfigHelper {
     enableMetricsLoggingBundle = null;
     suwJoinedUpLoadingBundle = null;
     oneTapBundle = null;
+    suwUseDesktopLayoutBundle = null;
     suwUseA11yShortcutBundle = null;
   }
 
@@ -1395,6 +1403,16 @@ public class PartnerConfigHelper {
       return suwUseModalDialogBundle.getBoolean(IS_SUW_USE_MODAL_DIALOG_ENABLED, false);
     }
 
+    return false;
+  }
+
+  /** Returns true if the SetupWizard use desktop layout. */
+  public static boolean isSuwUseDesktopLayoutEnabled(@NonNull Context context) {
+    suwUseDesktopLayoutBundle =
+        getPartnerBundle(context, IS_SUW_USE_DESKTOP_LAYOUT_ENABLED, suwUseDesktopLayoutBundle);
+    if (suwUseDesktopLayoutBundle != null) {
+      return suwUseDesktopLayoutBundle.getBoolean(IS_SUW_USE_DESKTOP_LAYOUT_ENABLED, false);
+    }
     return false;
   }
 
