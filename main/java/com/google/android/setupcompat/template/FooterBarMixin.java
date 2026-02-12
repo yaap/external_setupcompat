@@ -311,13 +311,13 @@ public class FooterBarMixin implements Mixin {
 
     if (secondaryBtn != 0) {
       setSecondaryButton(inflater.inflate(secondaryBtn));
-      metrics.logSecondaryButtonInitialStateVisibility(
-          /* isVisible= */ true, /* isUsingXml= */ true);
+      metrics.logPrimaryButtonInitialStateVisibility(/* isVisible= */ true, /* isUsingXml= */ true);
     }
 
     if (primaryBtn != 0) {
       setPrimaryButton(inflater.inflate(primaryBtn));
-      metrics.logPrimaryButtonInitialStateVisibility(/* isVisible= */ true, /* isUsingXml= */ true);
+      metrics.logSecondaryButtonInitialStateVisibility(
+          /* isVisible= */ true, /* isUsingXml= */ true);
     }
   }
 
@@ -1548,13 +1548,10 @@ public class FooterBarMixin implements Mixin {
 
   private void logButtonClickMetrics(View v) {
     if (v.getId() == primaryButtonId) {
-      LOG.atInfo("Primary button is clicked.");
       metrics.addButtonClicked(FooterBarMixinMetrics.BUTTON_TYPE_PRIMARY);
     } else if (v.getId() == secondaryButtonId) {
-      LOG.atInfo("Secondary button is clicked.");
       metrics.addButtonClicked(FooterBarMixinMetrics.BUTTON_TYPE_SECONDARY);
     } else if (v.getId() == tertiaryButtonId) {
-      LOG.atInfo("Tertiary button is clicked.");
       metrics.addButtonClicked(FooterBarMixinMetrics.BUTTON_TYPE_TERTIARY);
     }
   }

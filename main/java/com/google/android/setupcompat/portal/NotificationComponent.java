@@ -84,7 +84,6 @@ public class NotificationComponent implements Parcelable {
     NotificationType.DEFERRED_ONGOING,
     NotificationType.PORTAL,
     NotificationType.SETUP_COMPANION,
-    NotificationType.WHATSAPP_IMPORT,
   })
   public @interface NotificationType {
     int UNKNOWN = 0;
@@ -95,8 +94,7 @@ public class NotificationComponent implements Parcelable {
     int DEFERRED_ONGOING = 5;
     int PORTAL = 6;
     int SETUP_COMPANION = 7;
-    int WHATSAPP_IMPORT = 8;
-    int MAX = 9;
+    int MAX = 8;
   }
 
   public static class Builder {
