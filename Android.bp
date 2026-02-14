@@ -133,6 +133,7 @@ android_library {
         "com.google.android.material_material",
         "error_prone_annotations",
         "PartnerConfig",
+        "kotlin-parcelize-runtime",
     ],
     min_sdk_version: "23",
     sdk_version: "current",
@@ -146,6 +147,7 @@ android_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    kotlin_plugins: ["kotlin-parcelize-compiler-plugin"],
 }
 
 android_library {
@@ -166,6 +168,7 @@ android_library {
         "com.google.android.material_material",
         "error_prone_annotations",
         "PartnerConfig",
+        "kotlin-parcelize-runtime",
     ],
     min_sdk_version: "23",
     sdk_version: "current",
@@ -175,6 +178,7 @@ android_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    kotlin_plugins: ["kotlin-parcelize-compiler-plugin"],
 }
 
 android_library {
@@ -194,6 +198,7 @@ android_library {
         "androidx.window_window",
         "com.google.android.material_material",
         "error_prone_annotations",
+        "kotlin-parcelize-runtime",
     ],
     min_sdk_version: "23",
     sdk_version: "current",
@@ -203,4 +208,5 @@ android_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    kotlin_plugins: ["kotlin-parcelize-compiler-plugin"],
 }
