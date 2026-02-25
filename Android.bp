@@ -54,6 +54,7 @@ filegroup {
         "main/java/com/google/android/setupcompat/template/*.java",
         "main/java/com/google/android/setupcompat/util/*.java",
         "main/java/com/google/android/setupcompat/util/DelightHelper.kt",
+        "main/java/com/google/android/setupcompat/util/FocusIndicatorHelper.kt",
         "main/java/com/google/android/setupcompat/view/*.java",
     ],
     path: "main/java",

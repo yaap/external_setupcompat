@@ -64,6 +64,7 @@ import com.google.android.setupcompat.logging.internal.FooterBarMixinMetrics;
 import com.google.android.setupcompat.partnerconfig.PartnerConfig;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 import com.google.android.setupcompat.template.FooterButton.ButtonType;
+import com.google.android.setupcompat.util.FocusIndicatorHelper;
 import com.google.android.setupcompat.util.KeyboardHelper;
 import com.google.android.setupcompat.util.Logger;
 import com.google.android.setupcompat.view.ButtonBarLayout;
@@ -926,6 +927,8 @@ public class FooterBarMixin implements Mixin {
             buttonContainer.getPaddingRight(),
             buttonContainer.getPaddingBottom());
       }
+      FocusIndicatorHelper.applyFocusRingDrawable(
+          context, tempSecondaryButton, footerBarPrimaryBackgroundColor);
       buttonContainer.addView(tempSecondaryButton);
     }
     if (!isFooterButtonAlignedEnd() && !PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
@@ -934,6 +937,8 @@ public class FooterBarMixin implements Mixin {
 
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context) && tempTertiaryButton != null) {
       if (isBothButtons(tempPrimaryButton, tempSecondaryButton)) {
+        FocusIndicatorHelper.applyFocusRingDrawable(
+            context, tempTertiaryButton, footerBarPrimaryButtonEnabledTextColor);
         buttonContainer.addView(tempTertiaryButton);
       } else {
         LOG.atDebug("Cannot add tertiary button when primary or secondary button is null.");
@@ -941,6 +946,8 @@ public class FooterBarMixin implements Mixin {
     }
 
     if (tempPrimaryButton != null) {
+      FocusIndicatorHelper.applyFocusRingDrawable(
+          context, tempPrimaryButton, footerBarPrimaryButtonEnabledTextColor);
       buttonContainer.addView(tempPrimaryButton);
     }
 
