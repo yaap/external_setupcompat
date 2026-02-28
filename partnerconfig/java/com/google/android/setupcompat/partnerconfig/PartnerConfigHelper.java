@@ -114,6 +114,9 @@ public class PartnerConfigHelper {
   @VisibleForTesting
   public static final String IS_SUW_USE_A11Y_SHORTCUT_ENABLED = "isSuwUseA11yShortcutEnabled";
 
+  @VisibleForTesting
+  public static final String IS_SUW_USE_FOCUS_RING_ENABLED = "isSuwUseFocusRingEnabled";
+
   /** The method name to get the if the keyboard focus enhancement enabled */
   @VisibleForTesting
   public static final String IS_KEYBOARD_FOCUS_ENHANCEMENT_ENABLED_METHOD =
@@ -200,6 +203,10 @@ public class PartnerConfigHelper {
   @SuppressWarnings("NonFinalStaticField")
   @VisibleForTesting
   public static Bundle suwUseA11yShortcutBundle = null;
+
+  @SuppressWarnings("NonFinalStaticField")
+  @VisibleForTesting
+  public static Bundle suwUseFocusRingBundle = null;
 
   @VisibleForTesting public static int savedOrientation = Configuration.ORIENTATION_PORTRAIT;
 
@@ -916,6 +923,7 @@ public class PartnerConfigHelper {
     oneTapBundle = null;
     suwUseDesktopLayoutBundle = null;
     suwUseA11yShortcutBundle = null;
+    suwUseFocusRingBundle = null;
   }
 
   /**
@@ -1422,6 +1430,16 @@ public class PartnerConfigHelper {
         getPartnerBundle(context, IS_SUW_USE_A11Y_SHORTCUT_ENABLED, suwUseA11yShortcutBundle);
     if (suwUseA11yShortcutBundle != null && !suwUseA11yShortcutBundle.isEmpty()) {
       return suwUseA11yShortcutBundle.getBoolean(IS_SUW_USE_A11Y_SHORTCUT_ENABLED, false);
+    }
+    return false;
+  }
+
+  /** Returns true if the SetupWizard use focus ring. */
+  public static boolean isSuwUseFocusRingEnabled(@NonNull Context context) {
+    suwUseFocusRingBundle =
+        getPartnerBundle(context, IS_SUW_USE_FOCUS_RING_ENABLED, suwUseFocusRingBundle);
+    if (suwUseFocusRingBundle != null && !suwUseFocusRingBundle.isEmpty()) {
+      return suwUseFocusRingBundle.getBoolean(IS_SUW_USE_FOCUS_RING_ENABLED, false);
     }
     return false;
   }
