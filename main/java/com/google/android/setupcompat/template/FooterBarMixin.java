@@ -64,7 +64,7 @@ import com.google.android.setupcompat.logging.internal.FooterBarMixinMetrics;
 import com.google.android.setupcompat.partnerconfig.PartnerConfig;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 import com.google.android.setupcompat.template.FooterButton.ButtonType;
-import com.google.android.setupcompat.util.FocusIndicatorHelper;
+import com.google.android.setupcompat.util.FocusIndicatorDrawable;
 import com.google.android.setupcompat.util.KeyboardHelper;
 import com.google.android.setupcompat.util.Logger;
 import com.google.android.setupcompat.view.ButtonBarLayout;
@@ -324,7 +324,7 @@ public class FooterBarMixin implements Mixin {
 
   public void setDownButtonEnabled(boolean enable) {
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
-      downButtonEnable = enable;
+      this.downButtonEnable = enable;
     }
   }
 
@@ -536,7 +536,7 @@ public class FooterBarMixin implements Mixin {
       defaultPartnerTheme = R.style.SucPartnerCustomizationButton_Primary;
     }
 
-    // TODO: Use partner config to allow user to customize primary bg color.
+    // TODO: b/364980746 - Use partner config to allow user to customize primary bg color.
     // Setup button partner config
     FooterButtonPartnerConfig footerButtonPartnerConfig =
         new FooterButtonPartnerConfig.Builder(footerButton)
@@ -927,8 +927,7 @@ public class FooterBarMixin implements Mixin {
             buttonContainer.getPaddingRight(),
             buttonContainer.getPaddingBottom());
       }
-      FocusIndicatorHelper.applyFocusRingDrawable(
-          context, tempSecondaryButton, footerBarPrimaryBackgroundColor);
+      applyFocusRingDrawable(tempSecondaryButton, footerBarPrimaryBackgroundColor);
       buttonContainer.addView(tempSecondaryButton);
     }
     if (!isFooterButtonAlignedEnd() && !PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
@@ -937,8 +936,7 @@ public class FooterBarMixin implements Mixin {
 
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context) && tempTertiaryButton != null) {
       if (isBothButtons(tempPrimaryButton, tempSecondaryButton)) {
-        FocusIndicatorHelper.applyFocusRingDrawable(
-            context, tempTertiaryButton, footerBarPrimaryButtonEnabledTextColor);
+        applyFocusRingDrawable(tempTertiaryButton, footerBarPrimaryButtonEnabledTextColor);
         buttonContainer.addView(tempTertiaryButton);
       } else {
         LOG.atDebug("Cannot add tertiary button when primary or secondary button is null.");
@@ -946,8 +944,7 @@ public class FooterBarMixin implements Mixin {
     }
 
     if (tempPrimaryButton != null) {
-      FocusIndicatorHelper.applyFocusRingDrawable(
-          context, tempPrimaryButton, footerBarPrimaryButtonEnabledTextColor);
+      applyFocusRingDrawable(tempPrimaryButton, footerBarPrimaryButtonEnabledTextColor);
       buttonContainer.addView(tempPrimaryButton);
     }
 
@@ -958,6 +955,18 @@ public class FooterBarMixin implements Mixin {
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       buttonContainer.requestApplyInsets();
     }
+  }
+
+  private void applyFocusRingDrawable(View view, int color) {
+    if (!PartnerConfigHelper.isSuwUseFocusRingEnabled(context)) {
+      return;
+    }
+
+    view.setForeground(
+        new FocusIndicatorDrawable.Builder(context)
+            .withColorInt(color)
+            .withCornerRadius(999)
+            .build());
   }
 
   private void setEvenlyWeightedButtons(
@@ -994,7 +1003,7 @@ public class FooterBarMixin implements Mixin {
     }
   }
 
-  // TODO: Migrate setButtonWidthForExpressiveStyle of FooterBarMixin to
+  // TODO: b/369285240 - Migrate setButtonWidthForExpressiveStyle of FooterBarMixin to
   /** Sets button width for expressive style. */
   public void setButtonWidthForExpressiveStyle() {
     buttonContainer.post(
@@ -1010,7 +1019,7 @@ public class FooterBarMixin implements Mixin {
           }
 
           updateMiddleSpacing();
-          // TODO: Use partner config to allow user to customize button width.
+          // TODO: b/364981820 - Use partner config to allow user to customize button width.
           int availableFooterBarWidth =
               containerWidth
                   - footerBarPaddingStart
@@ -1051,7 +1060,13 @@ public class FooterBarMixin implements Mixin {
           } else if (isPrimaryButtonOnly(primaryButton, secondaryButton)) {
             LayoutParams primaryLayoutParams = (LayoutParams) primaryButton.getLayoutParams();
             if (primaryLayoutParams != null) {
-              primaryLayoutParams.width = availableFooterBarWidth;
+              // If the down button is enabled, the primary button width is set in the
+              // setDownButtonForExpressiveStyle method.
+              if (downButtonEnable) {
+                setDownButtonForExpressiveStyle();
+              } else {
+                primaryLayoutParams.width = availableFooterBarWidth;
+              }
               primaryButton.setLayoutParams(primaryLayoutParams);
             }
           } else if (isSecondaryOnly(primaryButton, secondaryButton)) {
@@ -1113,12 +1128,20 @@ public class FooterBarMixin implements Mixin {
 
   /** Sets down button for expressive style. */
   public void setDownButtonForExpressiveStyle() {
+    Button downButton = getPrimaryButtonView();
+    if (downButton == null) {
+      LOG.atDebug("Primary button is null when setting down button for expressive style, skip.");
+      return;
+    }
     downButtonEnable = true;
+
+    // Immediately apply the core Down Button size style to minimize visual glitch
+    setDownButtonStyle(downButton);
+
     buttonContainer.post(
         () -> {
           int containerWidth =
               buttonContainer.getMeasuredWidth() - windowInsetLeft - windowInsetRight;
-          setDownButtonStyle(getPrimaryButtonView());
           if (!isTwoPaneLayout()) {
             buttonContainer.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
           } else {
@@ -1128,7 +1151,6 @@ public class FooterBarMixin implements Mixin {
                 context
                     .getResources()
                     .getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
-            Button downButton = getPrimaryButtonView();
             LinearLayout.LayoutParams layoutParams =
                 (LinearLayout.LayoutParams) downButton.getLayoutParams();
             // Set padding for the button container to center the down button in two pane mode, it
@@ -1376,7 +1398,7 @@ public class FooterBarMixin implements Mixin {
   }
 
   private void setDownButtonStyle(Button button) {
-    // TODO: Extract values as attributes.
+    // TODO: b/364121308 - Extract values as attributes.
     int width =
         context.getResources().getDimensionPixelSize(R.dimen.suc_glif_expressive_down_button_width);
     int height =

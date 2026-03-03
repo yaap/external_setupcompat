@@ -427,7 +427,7 @@ public class FooterButtonStyleUtils {
     }
 
     if (icon != null) {
-      // TODO: restrict the icons to a reasonable size
+      // TODO: b/120488979 - restrict the icons to a reasonable size
       int h = icon.getIntrinsicHeight();
       int w = icon.getIntrinsicWidth();
       icon.setBounds(0, 0, w, h);
