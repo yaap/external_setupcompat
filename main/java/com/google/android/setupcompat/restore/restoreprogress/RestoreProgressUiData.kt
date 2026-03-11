@@ -17,16 +17,16 @@
 package com.google.android.setupcompat.restore.restoreprogress
 
 import android.os.Parcelable
-import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import kotlinx.parcelize.Parcelize
 
 /** The type of progress indicator to show. */
 enum class ProgressUiType {
   UNKNOWN,
-  INDETERMINATE_PROGRESS,
-  DETERMINATE_PROGRESS,
-  ICON,
+  DEFAULT_SOLID,
+  DEFAULT_GRADIENT,
+  ACTIONABLE_GRADIENT,
+  ERROR_SOLID,
   NONE,
 }
 
@@ -37,17 +37,23 @@ enum class ProgressUiType {
 @Parcelize
 data class RestoreProgressUiData(
   val progressUiType: ProgressUiType,
+  val progressIndeterminate: Boolean = false,
   val progressValue: Int = 0,
-  @DrawableRes val icon: Int = 0,
-  @ColorInt val iconTint: Int = -1,
+  @DrawableRes val progressIcon: Int = 0,
   @DrawableRes val bottomSheetIcon: Int = 0,
-  @ColorInt val bottomSheetIconTint: Int = -1,
   val bottomSheetTitle: String? = null,
   val bottomSheetDescription: String? = null,
   val bottomSheetButtonText: String? = null,
   val bottomSheetProgressBarVisible: Boolean = false,
   val bottomSheetCardVisible: Boolean = false,
+  val bottomSheetCardHighlighted: Boolean = false,
+  // The card icon will be hidden if this is true.
+  val bottomSheetCardShowIndicator: Boolean = false,
   @DrawableRes val bottomSheetCardIcon: Int = 0,
   val bottomSheetCardTitle: String? = null,
   val bottomSheetCardDescription: String? = null,
+  val toolTipVisible: Boolean = false,
+  val toolTipTitle: String? = null,
+  val toolTipDescription: String? = null,
+  val toolTipButtonText: String? = null,
 ) : Parcelable

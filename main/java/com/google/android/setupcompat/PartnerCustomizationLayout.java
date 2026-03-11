@@ -521,7 +521,7 @@ public class PartnerCustomizationLayout extends TemplateLayout {
 
   @Override
   public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-    // TODO: Add test case for edge to edge to layout from library.
+    // TODO: b/398407478 - Add test case for edge to edge to layout from library.
     if (PartnerConfigHelper.isGlifExpressiveEnabled(getContext())) {
       if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
         LOG.atInfo(
