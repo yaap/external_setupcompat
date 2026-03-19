@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
+import androidx.annotation.Nullable;
 import com.google.android.setupcompat.R;
 import com.google.android.setupcompat.partnerconfig.PartnerConfigHelper;
 import com.google.android.setupcompat.template.FooterActionButton;
@@ -43,6 +44,7 @@ public class ButtonBarLayout extends LinearLayout {
   private int originalPaddingRight;
 
   private boolean stackedButtonForExpressiveStyle;
+  private OnVisibilityChangeListener onVisibilityChangeListener;
 
   public ButtonBarLayout(Context context) {
     super(context);
@@ -50,6 +52,28 @@ public class ButtonBarLayout extends LinearLayout {
 
   public ButtonBarLayout(Context context, AttributeSet attrs) {
     super(context, attrs);
+  }
+
+  /** Listener for visibility change of the button bar. */
+  public interface OnVisibilityChangeListener {
+    void onVisibilityChanged(int visibility);
+  }
+
+  /** Sets the listener for visibility change of the button bar. */
+  public void setOnVisibilityChangeListener(@Nullable OnVisibilityChangeListener listener) {
+    this.onVisibilityChangeListener = listener;
+  }
+
+  @Override
+  public void setVisibility(int visibility) {
+    if (getVisibility() == visibility) {
+      return;
+    }
+
+    super.setVisibility(visibility);
+    if (onVisibilityChangeListener != null) {
+      onVisibilityChangeListener.onVisibilityChanged(visibility);
+    }
   }
 
   @Override
