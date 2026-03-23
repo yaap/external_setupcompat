@@ -38,6 +38,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -49,9 +51,11 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.setupcompat.PartnerCustomizationLayout;
 import com.google.android.setupcompat.R;
@@ -128,6 +132,10 @@ public class FooterBarMixin implements Mixin {
   @VisibleForTesting int footerBarButtonStackMiddleSpacing;
 
   @VisibleForTesting public final FooterBarMixinMetrics metrics = new FooterBarMixinMetrics();
+
+  private boolean footerBarHiddenByIme = false;
+  private int originalFooterVisibility = View.VISIBLE;
+  private ViewTreeObserver.OnPreDrawListener imeVisibilityGuard;
 
   private FooterButton.OnButtonEventListener createButtonEventListener(@IdRes int id) {
 
@@ -322,10 +330,31 @@ public class FooterBarMixin implements Mixin {
     }
   }
 
+  /**
+   * Sets whether the down button is enabled. This method is only effective when Glif expressive is
+   * enabled.
+   *
+   * @param enable Whether the down button is enabled.
+   */
   public void setDownButtonEnabled(boolean enable) {
     if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
       this.downButtonEnable = enable;
+    } else {
+      this.downButtonEnable = false;
     }
+  }
+
+  /**
+   * Returns whether the down button is enabled. This method is only effective when Glif expressive
+   * is enabled.
+   *
+   * @return Whether the down button is enabled. Otherwise, return false.
+   */
+  public boolean isDownButtonEnabled() {
+    if (PartnerConfigHelper.isGlifExpressiveEnabled(context)) {
+      return downButtonEnable;
+    }
+    return false;
   }
 
   public void setFragmentInfo(@Nullable Fragment fragment) {
@@ -410,7 +439,9 @@ public class FooterBarMixin implements Mixin {
       // Ignore action since buttonContainer is null
       return;
     }
-    buttonContainer.setId(View.generateViewId());
+    if (buttonContainer.getId() == View.NO_ID) {
+      buttonContainer.setId(View.generateViewId());
+    }
     updateFooterBarPadding(
         buttonContainer,
         footerBarPaddingStart + windowInsetLeft,
@@ -1767,5 +1798,156 @@ public class FooterBarMixin implements Mixin {
     } else {
       FooterButtonStyleUtils.updateButtonTextDisabledColor(button, color);
     }
+  }
+
+  /**
+   * Updates the footer bar visibility based on the IME visibility state.
+   *
+   * @param insets The current window insets.
+   */
+  @RequiresApi(VERSION_CODES.R)
+  public void updateFooterBarVisibilityWhenImeVisible(WindowInsets insets) {
+    boolean hideFooterBarWhenImeShown = false;
+    PartnerConfigHelper partnerConfigHelper = PartnerConfigHelper.get(context);
+    if (partnerConfigHelper.isPartnerConfigAvailable(
+        PartnerConfig.CONFIG_FOOTER_BAR_HIDE_WHEN_IME_SHOWN)) {
+      hideFooterBarWhenImeShown =
+          PartnerConfigHelper.get(context)
+              .getBoolean(context, PartnerConfig.CONFIG_FOOTER_BAR_HIDE_WHEN_IME_SHOWN, false);
+    }
+
+    if (!hideFooterBarWhenImeShown || buttonContainer == null) {
+      return;
+    }
+
+    boolean imeVisibleNow =
+        WindowInsetsCompat.toWindowInsetsCompat(insets, buttonContainer)
+            .isVisible(WindowInsetsCompat.Type.ime());
+
+    // If the buttonContainer is a ButtonBarLayout, we need to set the onVisibilityChangeListener
+    // to update the originalFooterVisibility.
+    setupFooterBarGuard();
+
+    if (imeVisibleNow) {
+      if (!footerBarHiddenByIme) {
+        if (buttonContainer.getVisibility() != View.GONE) {
+          originalFooterVisibility = buttonContainer.getVisibility();
+        }
+        footerBarHiddenByIme = true;
+        buttonContainer.setVisibility(View.GONE);
+      }
+
+      // Ensure the footer bar is hidden to prevent race condition.
+      ensureFooterBarGuard();
+    } else {
+      if (footerBarHiddenByIme) {
+        footerBarHiddenByIme = false;
+        // Set back to the original footer visibility.
+        LOG.atInfo("Restoring FooterBar visibility to original state: " + originalFooterVisibility);
+        buttonContainer.setVisibility(originalFooterVisibility);
+      }
+
+      if (buttonContainer.getVisibility() == View.VISIBLE) {
+        if (isDownButtonEnabled()) {
+          setDownButtonForExpressiveStyle();
+        } else {
+          setButtonWidthForExpressiveStyle();
+        }
+      }
+    }
+  }
+
+  /**
+   * A guard to update the originalFooterVisibility when the footer bar is hidden by the IME. The
+   * scenario is when the footer bar is hidden and the client set the visibility of the footer bar
+   * to VISIBLE or INVISIBLE, then the guard will update the originalFooterVisibility to the
+   * visibility of the footer bar that client set and keep setting the footer bar to GONE. Once IME
+   * is dismissed, the footer bar will be set back to the original footer visibility.
+   */
+  private void setupFooterBarGuard() {
+    if (buttonContainer == null) {
+      return;
+    }
+
+    if (buttonContainer instanceof ButtonBarLayout) {
+      ((ButtonBarLayout) buttonContainer)
+          .setOnVisibilityChangeListener(
+              visibility -> {
+                // Post the IME check to the end of the current UI thread cycle.
+                // This is necessary because when onApplyWindowInsets updates footer visibility,
+                // it can trigger this listener before getRootWindowInsets() reflects the latest IME
+                // state.
+                // Delaying the check ensures we get the most up-to-date WindowInsets.
+                buttonContainer.post(
+                    () -> {
+                      boolean isImeReallyVisible = false;
+                      WindowInsets insets = buttonContainer.getRootWindowInsets();
+                      if (insets != null) {
+                        isImeReallyVisible =
+                            WindowInsetsCompat.toWindowInsetsCompat(insets, buttonContainer)
+                                .isVisible(WindowInsetsCompat.Type.ime());
+                      }
+                      if (!footerBarHiddenByIme) {
+                        // Only update originalFooterVisibility if the footer's visibility is not
+                        // currently being managed due to the IME.
+                        originalFooterVisibility = visibility;
+                      }
+
+                      // If IME is up, ensure the FooterBar remains GONE, regardless of what
+                      // triggered the visibility change.
+                      if (isImeReallyVisible && buttonContainer.getVisibility() != View.GONE) {
+                        LOG.atInfo(
+                            "OnVisibilityChangeListener: FooterBar visibility is "
+                                + visibility
+                                + " but IME is visible. Forcing GONE.");
+                        buttonContainer.setVisibility(View.GONE);
+                      }
+                    });
+              });
+    }
+  }
+
+  /**
+   * A guard to ensure the footer bar is hidden when the IME is visible. This is necessary to
+   * prevent race conditions where the footer bar is not hidden when the IME is visible. This guard
+   * will keep setting the footer bar to GONE until the IME is dismissed.
+   */
+  public void ensureFooterBarGuard() {
+    if (buttonContainer == null || imeVisibilityGuard != null) {
+      return;
+    }
+
+    imeVisibilityGuard =
+        new ViewTreeObserver.OnPreDrawListener() {
+          @Override
+          public boolean onPreDraw() {
+            if (footerBarHiddenByIme) {
+              // If the keyboard is detected to be showing, and someone (like a Mixin) has set the
+              // Footer to be visible
+              if (buttonContainer.getVisibility() != View.GONE) {
+                buttonContainer.setVisibility(View.GONE); // Force to hide the footer bar
+                return false; // Cancel the current frame draw to force layout to eliminate flicker.
+              }
+            } else {
+              // The keyboard is dismissed, remove the guard.
+              if (buttonContainer.getViewTreeObserver().isAlive()) {
+                buttonContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+              }
+              imeVisibilityGuard = null;
+            }
+            return true;
+          }
+        };
+    buttonContainer.getViewTreeObserver().addOnPreDrawListener(imeVisibilityGuard);
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  public int getOriginalFooterVisibility() {
+    return originalFooterVisibility;
+  }
+
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  public boolean isFooterBarHiddenByIme() {
+    return footerBarHiddenByIme;
   }
 }

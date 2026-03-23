@@ -109,6 +109,10 @@ public class PartnerConfigHelper {
   public static final String IS_SUW_USE_MODAL_DIALOG_ENABLED = "isSuwUseModalDialogEnabled";
 
   @VisibleForTesting
+  public static final String IS_SUW_DISABLE_TRANSITIONS_IN_MODAL_VIEW_ACTIVE =
+      "isSuwDisableTransitionsInModalViewActive";
+
+  @VisibleForTesting
   public static final String IS_SUW_USE_DESKTOP_LAYOUT_ENABLED = "isSuwUseDesktopLayoutEnabled";
 
   @VisibleForTesting
@@ -1392,23 +1396,28 @@ public class PartnerConfigHelper {
 
   /** Returns true if the SetupWizard use modal dialog. */
   public static boolean isSuwUseModalDialogEnabled(@NonNull Context context) {
-    Bundle suwUseModalDialogBundle = null;
+    return getBooleanFromPartnerBundle(context, IS_SUW_USE_MODAL_DIALOG_ENABLED);
+  }
+
+  /** Returns true if transitions for modal dialogs are disabled. */
+  public static boolean isSuwDisableTransitionsInModalViewActive(@NonNull Context context) {
+    return getBooleanFromPartnerBundle(context, IS_SUW_DISABLE_TRANSITIONS_IN_MODAL_VIEW_ACTIVE);
+  }
+
+  private static boolean getBooleanFromPartnerBundle(@NonNull Context context, String method) {
+    Bundle bundle = null;
     try {
-      suwUseModalDialogBundle =
+      bundle =
           context
               .getContentResolver()
-              .call(
-                  getContentUri(),
-                  IS_SUW_USE_MODAL_DIALOG_ENABLED,
-                  /* arg= */ null,
-                  /* extras= */ null);
+              .call(getContentUri(), method, /* arg= */ null, /* extras= */ null);
     } catch (IllegalArgumentException | SecurityException exception) {
-      Log.w(TAG, "Method " + IS_SUW_USE_MODAL_DIALOG_ENABLED + " is unknown");
+      Log.w(TAG, "Method " + method + " is unknown");
       return false;
     }
 
-    if (suwUseModalDialogBundle != null && !suwUseModalDialogBundle.isEmpty()) {
-      return suwUseModalDialogBundle.getBoolean(IS_SUW_USE_MODAL_DIALOG_ENABLED, false);
+    if (bundle != null && !bundle.isEmpty()) {
+      return bundle.getBoolean(method, false);
     }
 
     return false;
