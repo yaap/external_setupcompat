@@ -37,6 +37,10 @@ public enum PartnerConfig {
   // Background color of the footer bar.
   CONFIG_FOOTER_BAR_BG_COLOR(PartnerConfigKey.KEY_FOOTER_BAR_BG_COLOR, ResourceType.COLOR),
 
+  // Background color of the footer bar when there is more content to scroll.
+  CONFIG_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR(
+      PartnerConfigKey.SETUP_COMPAT_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR, ResourceType.COLOR),
+
   // The min height of the footer buttons
   CONFIG_FOOTER_BAR_MIN_HEIGHT(PartnerConfigKey.KEY_FOOTER_BAR_MIN_HEIGHT, ResourceType.DIMENSION),
 
@@ -549,7 +553,22 @@ public enum PartnerConfig {
 
   // The selected radius of the card view.
   CONFIG_CARD_VIEW_SELECTED_RADIUS(
-      PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS, ResourceType.DIMENSION);
+      PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS, ResourceType.DIMENSION),
+
+  // The package name of assistive options.
+  CONFIG_ASSISTIVE_OPTIONS_PACKAGE_NAME(
+      PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_PACKAGE_NAME, ResourceType.STRING),
+
+  // The activity name of assistive options.
+  CONFIG_ASSISTIVE_OPTIONS_ACTIVITY_NAME(
+      PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_ACTIVITY_NAME, ResourceType.STRING),
+
+  // The background color of list items.
+  CONFIG_ITEMS_BACKGROUND_COLOR(PartnerConfigKey.KEY_ITEMS_BACKGROUND_COLOR, ResourceType.COLOR),
+
+  // The flag to allow hide footer bar when IME shown.
+  CONFIG_FOOTER_BAR_HIDE_WHEN_IME_SHOWN(
+      PartnerConfigKey.KEY_FOOTER_BAR_HIDE_WHEN_IME_SHOWN, ResourceType.BOOL);
 
   /** Resource type of the partner resources type. */
   public enum ResourceType {

@@ -41,13 +41,14 @@ interface LoggingObserver {
   enum class ButtonType {
     UNKNOWN,
     PRIMARY,
-    SECONDARY
+    SECONDARY,
+    TERTIARY,
   }
 
   enum class InteractionType {
     UNKNOWN,
     TAP,
     LONG_PRESS,
-    DOUBLE_TAP
+    DOUBLE_TAP,
   }
 }

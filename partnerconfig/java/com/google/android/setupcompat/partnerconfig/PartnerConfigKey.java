@@ -30,9 +30,11 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_LIGHT_NAVIGATION_BAR,
   PartnerConfigKey.KEY_NAVIGATION_BAR_DIVIDER_COLOR,
   PartnerConfigKey.KEY_FOOTER_BAR_BG_COLOR,
+  PartnerConfigKey.SETUP_COMPAT_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR,
   PartnerConfigKey.KEY_FOOTER_BAR_MIN_HEIGHT,
   PartnerConfigKey.KEY_FOOTER_BAR_PADDING_START,
   PartnerConfigKey.KEY_FOOTER_BAR_PADDING_END,
+  PartnerConfigKey.KEY_FOOTER_BAR_HIDE_WHEN_IME_SHOWN,
   PartnerConfigKey.KEY_FOOTER_BUTTON_FONT_FAMILY,
   PartnerConfigKey.KEY_FOOTER_BUTTON_FONT_WEIGHT,
   PartnerConfigKey.KEY_FOOTER_BUTTON_ICON_ADD_ANOTHER,
@@ -128,6 +130,7 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_ITEMS_MIN_HEIGHT,
   PartnerConfigKey.KEY_ITEMS_DIVIDER_SHOWN,
   PartnerConfigKey.KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS,
+  PartnerConfigKey.KEY_ITEMS_BACKGROUND_COLOR,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_DEFAULT,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_ACCOUNT,
   PartnerConfigKey.KEY_PROGRESS_ILLUSTRATION_CONNECTION,
@@ -161,6 +164,8 @@ import java.lang.annotation.RetentionPolicy;
   PartnerConfigKey.KEY_PROGRESS_BAR_MARGIN_BOTTOM,
   PartnerConfigKey.KEY_TWO_PANE_ADAPT_WINDOW_WIDTH,
   PartnerConfigKey.KEY_CARD_VIEW_SELECTED_RADIUS,
+  PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_PACKAGE_NAME,
+  PartnerConfigKey.KEY_ASSISTIVE_OPTIONS_ACTIVITY_NAME,
 })
 // TODO: can be removed and always reference PartnerConfig.getResourceName()?
 @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
@@ -185,6 +190,10 @@ public @interface PartnerConfigKey {
   // Background color of the footer bar.
   String KEY_FOOTER_BAR_BG_COLOR = "setup_compat_footer_bar_bg_color";
 
+  // Background color of the footer bar when there is more content to scroll.
+  String SETUP_COMPAT_FOOTER_BAR_MORE_TO_SCROLL_BG_COLOR =
+      "setup_compat_footer_bar_more_to_scroll_bg_color";
+
   // The min height of the footer bar
   String KEY_FOOTER_BAR_MIN_HEIGHT = "setup_compat_footer_bar_min_height";
 
@@ -193,6 +202,9 @@ public @interface PartnerConfigKey {
 
   // The padding end of the footer bar
   String KEY_FOOTER_BAR_PADDING_END = "setup_compat_footer_bar_padding_end";
+
+  // The flag to enable/disable hide footer bar when IME shown.
+  String KEY_FOOTER_BAR_HIDE_WHEN_IME_SHOWN = "setup_compat_footer_bar_hide_when_ime_shown";
 
   // The font face used in footer buttons. This must be a string reference to a font that is
   // available in the system. Font references (@font or @xml) are not allowed.
@@ -479,6 +491,9 @@ public @interface PartnerConfigKey {
   String KEY_ITEMS_TITLE_FONT_VARIATION_SETTINGS =
       "setup_design_items_title_font_variation_settings";
 
+  // The background color of list items.
+  String KEY_ITEMS_BACKGROUND_COLOR = "setup_design_items_background_color";
+
   // The intrinsic width of the card view for foldable/tablet.
   String KEY_CARD_VIEW_INTRINSIC_WIDTH = "setup_design_card_view_intrinsic_width";
 
@@ -611,4 +626,10 @@ public @interface PartnerConfigKey {
 
   // The selected radius of the card view.
   String KEY_CARD_VIEW_SELECTED_RADIUS = "setup_design_card_view_selected_radius";
+
+  // The package name of assistive options.
+  String KEY_ASSISTIVE_OPTIONS_PACKAGE_NAME = "assistive_options_package_name";
+
+  // The activity name of assistive options.
+  String KEY_ASSISTIVE_OPTIONS_ACTIVITY_NAME = "assistive_options_activity_name";
 }

@@ -36,6 +36,16 @@ filegroup {
 }
 
 filegroup {
+    name: "AidlsRestoreProgress",
+    srcs: [
+        "main/aidl/com/google/android/setupcompat/restore/restoreprogress/IRestoreProgressCallback.aidl",
+        "main/aidl/com/google/android/setupcompat/restore/restoreprogress/IRestoreProgressService.aidl",
+        "main/aidl/com/google/android/setupcompat/restore/restoreprogress/RestoreProgressUiData.aidl",
+    ],
+    path: "main/aidl",
+}
+
+filegroup {
     name: "AidlsBts",
     srcs: [
         "bts/aidl/com/google/android/setupcompat/bts/*.aidl",
@@ -51,8 +61,11 @@ filegroup {
         "main/java/com/google/android/setupcompat/logging/*.java",
         "main/java/com/google/android/setupcompat/logging/*.kt",
         "main/java/com/google/android/setupcompat/logging/internal/*.java",
+        "main/java/com/google/android/setupcompat/restore/restoreprogress/RestoreProgressUiData.kt",
         "main/java/com/google/android/setupcompat/template/*.java",
         "main/java/com/google/android/setupcompat/util/*.java",
+        "main/java/com/google/android/setupcompat/util/DelightHelper.kt",
+        "main/java/com/google/android/setupcompat/util/FocusIndicatorDrawable.kt",
         "main/java/com/google/android/setupcompat/view/*.java",
     ],
     path: "main/java",
@@ -83,6 +96,38 @@ filegroup {
 }
 
 android_library {
+    name: "setupcompat_wizard_manager_constants",
+    manifest: "AndroidManifest.xml",
+    srcs: [
+        "main/java/com/google/android/setupcompat/util/SuwLifeCycleEnum.kt",
+        "main/java/com/google/android/setupcompat/util/WizardManagerConstants.kt",
+    ],
+    min_sdk_version: "23",
+    sdk_version: "current",
+}
+
+// Temporarily remove the library to avoid the build crash.
+//android_library {
+//    name: "setupcompat_compat_wizard_manager",
+//    manifest: "AndroidManifest.xml",
+//    srcs: [
+//        "main/java/com/google/android/setupcompat/util/WizardManagerCompatHelper.kt",
+//    ],
+//    min_sdk_version: "23",
+//    sdk_version: "system_current",
+//   static_libs: [
+//       "setupcompat",
+//        "android_onboarding.contracts.setupwizard.orchestrator",
+//        "android_onboarding.utils.persistable",
+//        "android_onboarding.versions",
+//        "android_onboarding.versions.changes",
+//        "android_onboarding.wizardmanager.actions",
+//        "wizard_manager.WizardManagerExtras",
+//        "androidx.annotation_annotation",
+//    ],
+//}
+
+android_library {
     name: "setupcompat",
     manifest: "AndroidManifest.xml",
     resource_dirs: [
@@ -91,6 +136,7 @@ android_library {
     srcs: [
         ":Aidls",
         ":AidlsPortal",
+        ":AidlsRestoreProgress",
         ":Srcs",
         ":SrcsPortal",
     ],
@@ -100,19 +146,21 @@ android_library {
         "com.google.android.material_material",
         "error_prone_annotations",
         "PartnerConfig",
+        "kotlin-parcelize-runtime",
     ],
     min_sdk_version: "23",
     sdk_version: "current",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
     apex_available: [
         "//apex_available:platform",
         "com.android.healthfitness",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
+    kotlin_plugins: ["kotlin-parcelize-compiler-plugin"],
 }
 
 android_library {
@@ -133,6 +181,7 @@ android_library {
         "com.google.android.material_material",
         "error_prone_annotations",
         "PartnerConfig",
+        "kotlin-parcelize-runtime",
     ],
     min_sdk_version: "23",
     sdk_version: "current",
@@ -142,6 +191,7 @@ android_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    kotlin_plugins: ["kotlin-parcelize-compiler-plugin"],
 }
 
 android_library {
@@ -161,6 +211,7 @@ android_library {
         "androidx.window_window",
         "com.google.android.material_material",
         "error_prone_annotations",
+        "kotlin-parcelize-runtime",
     ],
     min_sdk_version: "23",
     sdk_version: "current",
@@ -170,4 +221,5 @@ android_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    kotlin_plugins: ["kotlin-parcelize-compiler-plugin"],
 }

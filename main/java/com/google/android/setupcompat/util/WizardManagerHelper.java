@@ -16,7 +16,6 @@
 
 package com.google.android.setupcompat.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -31,6 +30,7 @@ import java.util.Arrays;
  * and invoking Wizard Manager to start the next action.
  */
 public final class WizardManagerHelper {
+
 
   /** Enum for notifying an Activity that what SetupWizard flow is */
   public enum SuwLifeCycleEnum {
@@ -70,6 +70,9 @@ public final class WizardManagerHelper {
   /** Extra for notifying an Activity that it is inside the "Portal Setup" flow. */
   public static final String EXTRA_IS_PORTAL_SETUP = "portalSetup";
 
+  /** Extra for notifying an Activity that it is inside the "Custom Setup" flow. */
+  public static final String EXTRA_IS_CUSTOM_SETUP = "customSetup";
+
   /**
    * Extra for including a persistable map of Onboarding Node Id to MetadataStore.
    *
@@ -96,6 +99,7 @@ public final class WizardManagerHelper {
   public static final String SETTINGS_GLOBAL_DEVICE_PROVISIONED = "device_provisioned";
   public static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
+
   /**
    * Gets an intent that will invoke the next step of setup wizard.
    *
@@ -119,7 +123,7 @@ public final class WizardManagerHelper {
    * @return A new intent that can be used with {@link Activity#startActivityForResult(Intent, int)}
    *     to start the next step of the setup flow.
    */
-  public static Intent getNextIntent(Intent originalIntent, int resultCode, Intent data) {
+  public static Intent getNextIntent(Intent originalIntent, int resultCode, @Nullable Intent data) {
     Intent intent = new Intent(ACTION_NEXT);
     copyWizardManagerExtras(originalIntent, intent);
     intent.putExtra(EXTRA_RESULT_CODE, resultCode);

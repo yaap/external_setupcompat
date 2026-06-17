@@ -23,6 +23,9 @@
     <!-- A boolean value that indicates whether the device should show two panes. -->
     <bool name="sucTwoPaneLayoutStyle">false</bool>
 
+    <!-- Whether to hide the footer bar when the IME is shown. -->
+    <bool name="suc_footer_bar_hide_when_ime_shown">false</bool>
+
     <!-- Pixel theme -->
     <string name="setup_design_layout_gravity">start</string>
     <integer name="setup_design_header_auto_size_max_line_of_max_size">2</integer>

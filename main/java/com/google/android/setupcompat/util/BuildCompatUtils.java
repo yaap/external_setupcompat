@@ -85,5 +85,18 @@ public final class BuildCompatUtils {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA;
   }
 
+  /**
+   * Implementation of BuildCompat.isAtLeastC() suitable for use in Setup
+   *
+   * @return Whether the current OS version is higher or equal to Cinnamon Bun.
+   */
+  public static boolean isAtLeastC() {
+    // TODO: b/476221623 - Remove the code name check and add the @ChecksSdkIntAtLeast annotation
+    // once the SDK version is finalized.
+    return Build.VERSION.SDK_INT >= 37
+        || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
+            && Build.VERSION.CODENAME.equals("CinnamonBun"));
+  }
+
   private BuildCompatUtils() {}
 }
